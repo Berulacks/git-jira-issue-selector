@@ -28,13 +28,15 @@ class IssueAppender:
         #print("Row: {0}, Col: {0}".format(start_row,start_col))
 
         # Space out the terminal (important)
-        for i in range(self.NUM_RESULTS+1):
-            print(i)
+        for i in range(self.NUM_RESULTS+2):
+            print("")
 
         query = ""
 
         self.update_search_query(term,query)
         self.update_results(term,query)
+
+        print(term.move(term.height - self.NUM_RESULTS - 3,len(self.QUERY_TEXT+query))+"",end='',flush=True)
 
         while True:
             with term.cbreak():
@@ -52,17 +54,19 @@ class IssueAppender:
                 if key == "KEY_DELETE":
                     query = query[:-1]
 
+                print(term.move(term.height - self.NUM_RESULTS - 3,len(self.QUERY_TEXT+query)),end='',flush=True)
+
                 self.update_search_query(term,query)
                 self.update_results(term,query)
 
 
     def update_search_query(self,term,query=""):
         # Have to do -2 here since this starts at 1
-        with term.location(0,term.height - self.NUM_RESULTS - 2):
+        with term.location(x=0,y=term.height - self.NUM_RESULTS - 3):
             print(term.clear_eol() + self.QUERY_TEXT + query, end='')
 
     def update_results(self,term,query=""):
-        with term.location(0,term.height - self.NUM_RESULTS - 1):
+        with term.location(x=0,y=term.height - self.NUM_RESULTS - 1):
             for query in self.issues[:-1]:
                 term.clear_eol()
                 print(term.clear_eol()+query)
