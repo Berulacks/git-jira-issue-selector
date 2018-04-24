@@ -39,6 +39,8 @@ class JiraConnector:
         if assignee is not None:
             jql += " AND assignee = '{0}'".format(assignee)
 
+        jql += " AND resolution = unresolved"
+
         headers = {"Accept":"application/json"}
 
         url = self.SEARCH_URL

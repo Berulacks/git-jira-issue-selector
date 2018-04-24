@@ -1,6 +1,9 @@
 from jira_issue import JiraConnector
+from fuzzywuzzy import process
 import yaml
 import blessed
+import operator
+
 
 class IssueAppender:
 
@@ -36,6 +39,7 @@ class IssueAppender:
         self.update_search_query(term,query)
         self.update_results(term,query)
 
+        # Move the cursor to the start (after the query text)
         print(term.move(term.height - self.NUM_RESULTS - 3,len(self.QUERY_TEXT+query))+"",end='',flush=True)
 
         while True:
@@ -54,8 +58,8 @@ class IssueAppender:
                 if key == "KEY_DELETE":
                     query = query[:-1]
 
+                # Update the cursory position, query results, and query text
                 print(term.move(term.height - self.NUM_RESULTS - 3,len(self.QUERY_TEXT+query)),end='',flush=True)
-
                 self.update_search_query(term,query)
                 self.update_results(term,query)
 
@@ -66,13 +70,33 @@ class IssueAppender:
             print(term.clear_eol() + self.QUERY_TEXT + query, end='')
 
     def update_results(self,term,query=""):
+
+        issues = self.issues
+
+        if len(query) > 0:
+            # Perform the sort
+            scored_results = process.extract(query,issues,limit=self.NUM_RESULTS)
+            #print(scored_results)
+            #term.inkey()
+
+            # Sort the results!
+            scored_results = sorted(scored_results, key=operator.itemgetter(1), reverse=True)
+            # Copy the first part of the tuple into issues (scored_results is in [(value,score),(...)] form
+            issues = [ result[0] for result in scored_results ]
+            
+
+        # Print the issues
         with term.location(x=0,y=term.height - self.NUM_RESULTS - 1):
-            for query in self.issues[:-1]:
+            for query in issues[:-1]:
                 term.clear_eol()
                 print(term.clear_eol()+query)
 
+            # Print the LAST item of the list without the trailing newline, important to preserve our UI
             term.clear_eol()
-            print(term.clear_eol+query, end='')
+            print(term.clear_eol+issues[-1], end='')
+
+        # Update the global list?
+        self.issues = issues
 
     def get_responses(self):
         response = self.connector.search_issues("PNAME","<YOUR_NAME_HERE>")
