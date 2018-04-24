@@ -1,6 +1,6 @@
 import requests
 import json
-import curses
+import yaml
 import blessed
 from blessed import Terminal
 
@@ -9,8 +9,41 @@ class JiraConnector:
     API_URL = "https://<COMPANY_NAME>.atlassian.net"
     SEARCH_URL = "https://<COMPANY_NAME>.atlassian.net/rest/api/2/search"
 
-    def __init__(self,api_key):
-        self.api_key = api_key
+    def __init__(self,config="jira.conf"):
+
+        config = self.load_config(config)
+        self.apply_config(config)
+        #self.apply_cli_params(params)
+
+
+    def apply_config(self,config):
+        self.api_key = config["Jira"]["Api Key"]
+
+    def load_config(self,path):
+
+        fd = open(path, 'r')
+        global_config = yaml.load( fd )
+        fd.close()
+
+        return global_config
+
+    def search_issues(self,project,assignee=None,fields=None):
+        if fields is not None:
+            fields = ["summary","status","fixVersions","assignee"]
+
+        jql = "project = {0}".format(project)
+
+        if assignee is not None:
+            jql += " AND assignee = '{0}'".format(assignee)
+
+        headers = {"Accept":"application/json"}
+
+        url = self.SEARCH_URL
+
+        payload = { "jql":jql, "fields":fields }
+
+        return self.make_request(url, headers, payload)
+
 
     def make_request(self,url,headers=None,payload=None):
         #if payload is None:
@@ -24,16 +57,16 @@ class JiraConnector:
 
         #print( "Raw data: {0}\n".format(json_data["issues"]) )
 
-        for issue in json_data["issues"]:
-            fields = issue["fields"]
-            key = issue["key"]
-            print("[{0}] {1} {2} - {3}\n".format(key,fields["summary"],fields["fixVersions"][0]["name"],fields["assignee"]["displayName"]))
-
         return json_data
 
+jc = JiraConnector()
+response = jc.search_issues("PNAME","<YOUR_NAME_HERE>")
 
-jc = JiraConnector("<YOUR_API_KEY_HERE>")
-response = jc.make_request(jc.SEARCH_URL,{"Accept":"application/json"},{"jql":"project = PNAME AND assignee = '<YOUR_NAME_HERE>'", "fields":["summary","status","fixVersions","assignee"]})
+for issue in response["issues"]:
+    fields = issue["fields"]
+    key = issue["key"]
+    print("[{0}] {1} {2} - {3}".format(key,fields["summary"],fields["fixVersions"][0]["name"],fields["assignee"]["displayName"]))
+
 #print(jc.make_request(jc.SEARCH_URL,{"Accept":"application/json"},{"jql":"project = PNAME AND assignee = '<YOUR_NAME_HERE>'", "fields":["*all"]}))
 for x in range(5):
     print("")
