@@ -4,9 +4,14 @@ import blessed
 
 class IssueAppender:
 
+    QUERY_TEXT = "Search for issue: "
+
     def __init__(self,config="jira.conf"):
 
         config = self.load_config(config)
+
+        #Configure UI and JiraConnector
+        self.apply_config(config)
         self.connector = JiraConnector(config)
 
         self.issues = self.get_responses()
@@ -16,33 +21,65 @@ class IssueAppender:
 
     def start_ui(self):
         #I FEEL BLESSED
-        NUM_RESULTS = 7
 
         term = blessed.Terminal()
-        term.move_y(50)
 
-        #with term.location(0, term.height - 1):
-         #       print('This is ' + term.underline('underlined') + '!')
+        #start_row, start_col = term.get_location()
+        #print("Row: {0}, Col: {0}".format(start_row,start_col))
+
+        # Space out the terminal (important)
+        for i in range(self.NUM_RESULTS+1):
+            print(i)
+
+        query = ""
+
+        self.update_search_query(term,query)
+        self.update_results(term,query)
 
         while True:
             with term.cbreak():
                 key = term.inkey()
                 if key.is_sequence:
-                    print("You typed: {0}".format(key.name))
+                    # Are we a special like KEY_UP?
+                    key = key.name
                 else:
+                    # ...or just a normal letter?
+                    query += key
 
-                    print("You typed: {0}".format(key))
-
-                if key == "a":
+                if key == "KEY_ENTER":
                     exit()
+
+                if key == "KEY_DELETE":
+                    query = query[:-1]
+
+                self.update_search_query(term,query)
+                self.update_results(term,query)
+
+
+    def update_search_query(self,term,query=""):
+        # Have to do -2 here since this starts at 1
+        with term.location(0,term.height - self.NUM_RESULTS - 2):
+            print(term.clear_eol() + self.QUERY_TEXT + query, end='')
+
+    def update_results(self,term,query=""):
+        with term.location(0,term.height - self.NUM_RESULTS - 1):
+            for query in self.issues[:-1]:
+                term.clear_eol()
+                print(term.clear_eol()+query)
+
+            term.clear_eol()
+            print(term.clear_eol+query, end='')
 
     def get_responses(self):
         response = self.connector.search_issues("PNAME","<YOUR_NAME_HERE>")
         issues = self.connector.build_issues_array(response)
 
-        print(issues)
+        #print(issues)
 
         return issues
+
+    def apply_config(self,config):
+        self.NUM_RESULTS = 7
 
     def load_config(self,path):
 
