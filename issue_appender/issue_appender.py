@@ -1,4 +1,5 @@
-from jira_issue import JiraConnector
+from issue_appender.jira_issue import JiraConnector
+
 from fuzzywuzzy import process
 import yaml
 import blessed
