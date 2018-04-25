@@ -15,6 +15,7 @@ class JiraConnector:
         #self.apply_cli_params(params)
 
     def apply_config(self,config):
+        self.user_name = config["Jira"]["Username"]
         self.api_key = config["Jira"]["Api Key"]
 
     # Converts a GET Json response dict to a list of searchable strings
@@ -53,7 +54,7 @@ class JiraConnector:
     def make_request(self,url,headers=None,payload=None):
 
         #TODO just use **kwargs instead of headers and payload?
-        response = requests.get(url, auth=("<YOUR_ATLASSIAN_EMAIL>",self.api_key), params=payload)
+        response = requests.get(url, auth=(self.user_name,self.api_key), params=payload)
         json_data = json.loads(response.text)
 
         #print( "Raw data: {0}\n".format(json_data["issues"]) )
