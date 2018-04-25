@@ -286,7 +286,7 @@ class IssueAppender:
         args = parser.parse_args()
 
         config_path = args.config_path
-        self.cache_file_path = self.script_dir() + "/.issue_cache"
+        self.cache_file_path = os.getcwd() + "/.issue_cache"
         self.ISSUE_FILE = args.issue_file
 
         self.config = self.load_config(config_path)
