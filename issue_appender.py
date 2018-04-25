@@ -16,7 +16,6 @@ class IssueAppender:
     NUM_RESULTS = 7
     # By default refresh the issues every n minutes
     refresh_interval = 1440
-    ISSUE_FILE = "current_jira_issue"
 
     def __init__(self):
 
@@ -36,24 +35,22 @@ class IssueAppender:
             self.write_to_cache(self.cache_file_path)
             self.selected_issue = selected_issue
 
-        return select_issue
+        term = blessed.Terminal()
+        print(term.clear_eos()+"")
 
     def save_issue(self,issue_to_save):
 
         if self.dry_run:
             return
 
-        file_path = self.script_dir() + "/" + self.ISSUE_FILE
+        file_path = self.ISSUE_FILE
         issue_key = issue_to_save.split(" ")[0]
 
         with open(file_path,"w+") as issue_file:
             issue_file.write(issue_key)
 
-
-
     def select_issue(self):
         #I FEEL BLESSED
-
         term = blessed.Terminal()
 
         #start_row, start_col = term.get_location()
@@ -237,10 +234,13 @@ class IssueAppender:
         parser.add_argument('-e', '--edit-conf', action='store_true', help='Drops the user into an editor to edit their configuration file. The $EDITOR shell variable must be set for this')
         parser.add_argument('-d', '--dry-run', action='store_true', help='Does not save anything to the disk (cache or otherwise)')
 
+        parser.add_argument(dest="issue_file", type=str, default=self.script_dir()+"/selected_issue", help='The selected issue will be written to this file, if passed. Use this to actually receive the output of the program. I recommend using mktemp to generate this file path.', metavar='issue_file_to_write_to')
+
         args = parser.parse_args()
 
         config_path = args.config_path
         self.cache_file_path = self.script_dir() + "/.issue_cache"
+        self.ISSUE_FILE = args.issue_file
 
         self.config = self.load_config(config_path)
         #Configure UI
@@ -261,5 +261,7 @@ class IssueAppender:
             exit()
 
 if __name__ == '__main__':
+
+
     ins = IssueAppender()
-    return ins.select_issue
+    print(ins.selected_issue)
