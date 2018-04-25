@@ -3,6 +3,9 @@ from fuzzywuzzy import process
 import yaml
 import blessed
 import operator
+import argparse, code
+
+import sys,os
 
 
 class IssueAppender:
@@ -11,13 +14,12 @@ class IssueAppender:
     # By default print 5 issues at a time
     NUM_RESULTS = 7
 
-    def __init__(self,config="jira.conf"):
+    def __init__(self):
 
-        config = self.load_config(config)
+        self.parse_args()
 
-        #Configure UI and JiraConnector
-        self.apply_config(config)
-        self.connector = JiraConnector(config)
+
+        self.connector = JiraConnector(self.config)
 
         self.issues = self.get_responses()
 
@@ -133,7 +135,27 @@ class IssueAppender:
     def results_to_show(self):
         return min(self.NUM_RESULTS, len(self.issues))
 
+    def parse_args(self):
+        parser = argparse.ArgumentParser(description="A JIRA issue selector for git messages",formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser.add_argument('-n', '--num-results', type=int, default=5, help='The number of results to show on screen', metavar='num_results_to_show')
+        parser.add_argument('-c', '--config-path', default=os.path.dirname(os.path.realpath(__file__))+"/jira.conf", help='The relative path to the configuration file.', metavar='path_to_config_file')
 
+        parser.add_argument('-u', '--update-cache', action='store_true', help='Update the issue cache. This happens automatically according to the config (usually), but can be manually controlled from here.')
+        parser.add_argument('-e', '--edit-conf', action='store_true', help='Drops the user into an editor to edit their configuration file. The $EDITOR shell variable must be set for this')
+
+        args = parser.parse_args()
+
+        config_path = args.config_path
+        self.config = self.load_config(config_path)
+        #Configure UI
+        self.apply_config(self.config)
+
+        self.update_on_start = args.update_cache
+        self.NUM_RESULTS = args.num_results
+
+        if args.edit_conf:
+            os.system("$EDITOR {0}".format(config_path))
+            exit()
 
 if __name__ == '__main__':
     ins = IssueAppender()
