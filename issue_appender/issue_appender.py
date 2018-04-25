@@ -264,7 +264,7 @@ class IssueAppender:
         config_file_path = config_path.joinpath(self.CONFIG_FILE_NAME)
 
         if not os.path.exists(config_file_path):
-            shutil.copyfile(self.script_dir()+"/{}.example".format(self.CONFIG_FILE_NAME),config_file_path)
+            shutil.copyfile(self.script_dir()+"/../config/{}.example".format(self.CONFIG_FILE_NAME),config_file_path)
 
     def parse_args(self):
 
