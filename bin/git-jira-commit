@@ -1,0 +1,7 @@
+#!/bin/bash
+
+TEMP_FILE=${mktemp}
+python -m issue_appender $TEMP_FILE
+git commit -t $TEMP_FILE
+
+rm $TEMP_FILE

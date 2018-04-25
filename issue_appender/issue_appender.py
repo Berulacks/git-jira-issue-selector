@@ -55,7 +55,7 @@ class IssueAppender:
         issue_key = issue_to_save.split(" ")[0]
 
         with open(file_path,"w+") as issue_file:
-            issue_file.write(issue_key)
+            issue_file.write("{} ".format(issue_key))
 
     def select_issue(self):
         #I FEEL BLESSED
