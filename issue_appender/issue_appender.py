@@ -6,6 +6,7 @@ import blessed
 import operator
 import argparse, code
 import time
+import collections
 
 import sys,os,pathlib,shutil
 
@@ -17,11 +18,11 @@ class IssueAppender:
 
     # Default names for configuration
     CONFIG_DIR_NAME = "jira_issue_appender"
-    GLOBAL_CONFIG_FILE_NAME = "jira.conf"
+    GLOBAL_CONFIG_FILE_NAME = "global.conf"
 
     ISSUES_FOLDER_NAME = "issues"
     LOCAL_CONFIGS_FOLDER_NAME = "configs"
-    LOCAL_CONFIGS_PREFIX = "localconfig"
+    LOCAL_CONFIGS_PREFIX = "local.conf"
 
     QUERY_TEXT = "Search for issue: "
     # By default print 5 issues at a time
@@ -237,8 +238,8 @@ class IssueAppender:
             return global_config
         return None
 
-    def init_configs(self):
-        global_config_path = self.config_dir().joinpath("jira.conf")
+    def configure(self):
+        global_config_path = self.config_dir().joinpath(self.GLOBAL_CONFIG_FILE_NAME)
         local_config_path = self.config_dir().joinpath( "{2}/{0}.{1}.{3}".format(self.get_git_root_dir(), self.get_git_branch(),self.LOCAL_CONFIGS_FOLDER_NAME,self.LOCAL_CONFIGS_PREFIX) )
 
         final_conf = {}
@@ -249,25 +250,56 @@ class IssueAppender:
             # uh oh, no config could be found
 
             # If this is the default config that isn't there, lets create it
-            self.init_sys()
+            #self.init_sys()
+            self.init_config_system(global_config_path)
             # Ask the user to configure the program
-            print("First time setup complete, configuration required. Press any key to continue.".format(path))
+            print("First time setup complete, configuration required. Press any key to continue.")
             blessed.Terminal().inkey()
             self.edit_file(global_config_path,False)
             
-            print("Config generated. Please try again. Remember, you can always call `issue_appender -e` to edit the global config".format(path))
+            print("Config generated. Please try again. Remember, you can always call `issue_appender -e global` to edit the global config")
             blessed.Terminal().inkey()
-
             exit(0)
 
+        # Load Local config (copying pasting the same code so that I can print the unique message)
         local_conf = self.load_config(local_config_path)
         if local_conf is None:
+            print("First time local setup complete, configuration required. Press any key to continue.")
+            print("Copying from {1} to {0}".format(local_config_path,self.script_dir()+"/../config/{}.example".format(self.LOCAL_CONFIGS_PREFIX)))
+            self.init_config_system(local_config_path,self.script_dir()+"/../config/{}.example".format(self.LOCAL_CONFIGS_PREFIX))
+            blessed.Terminal().inkey()
+            self.edit_file(local_config_path,False)
 
+            print("Config generated. Continuing... Remember, you can always call `issue_appender -e local` to edit the local config")
+            blessed.Terminal().inkey()
 
+        final_conf = global_conf 
+        
+        # Load the local conf onto the global
+        print(global_conf)
+        self.dict_merge(final_conf,local_conf)
+        print (final_conf)
 
-    def load_global_config(self):
+        self.config = final_conf
 
-    def load_local_config(self):
+        #Configure UI
+        self.apply_config(final_conf)
+
+        return final_conf
+
+    def init_config_system(self,path,example_config=None):
+
+        # Make the parent directory (if necessary)
+        if not os.path.exists( str(path.parent) ):
+            os.makedirs(path.parent)
+
+        # Now the file itself
+        if not os.path.exists( str(path) ):
+            if example_config is None:
+                # Try to guess where the example file lives...
+                shutil.copyfile(self.script_dir()+"/../config/{}.example".format(path.name),path)
+            else:
+                shutil.copyfile(example_config,path)
 
     def results_to_show(self):
         return min(self.NUM_RESULTS, len(self.issues))
@@ -279,7 +311,10 @@ class IssueAppender:
         return pathlib.Path.home().joinpath(".config/{0}/{1}".format(self.CONFIG_DIR_NAME,self.LOCAL_CONFIGS_FOLDER_NAME))
 
     def global_config_path(self):
-        return pathlib.Path.home().joinpath(".config/{}/{}".format(self.CONFIG_DIR_NAME,self.CONFIG_FILE_NAME))
+        return pathlib.Path.home().joinpath(".config/{0}/{1}".format(self.CONFIG_DIR_NAME,self.GLOBAL_CONFIG_FILE_NAME))
+
+    def config_dir(self):
+        return pathlib.Path.home().joinpath(".config/{0}".format(self.CONFIG_DIR_NAME))
 
     
     def edit_file(self,path,exit=False):
@@ -293,7 +328,7 @@ class IssueAppender:
         git_repo = git.Repo(path, search_parent_directories=True)
         git_root = git_repo.git.rev_parse("--show-toplevel")
 
-        return os.path.basename(git_root)
+        return os.path.basename(git_root).rstrip()
 
 
     def get_git_branch(self):
@@ -304,22 +339,26 @@ class IssueAppender:
 
         if "* " in git_branch:
             git_branch = git_branch.split(" ")
-            return git_branch[1]
+            return git_branch[1].rstrip()
 
-        return git_branch
+        return git_branch.rstrip()
 
-    def init_sys(self):
+    def dict_merge(self,dct, merge_dct):
+        """ Recursive dict merge. Inspired by :meth:``dict.update()``, instead of
+        updating only top-level keys, dict_merge recurses down into dicts nested
+        to an arbitrary depth, updating keys. The ``merge_dct`` is merged into
+        ``dct``.
 
-        config_path = self.config_dir()
-
-        if not os.path.exists(config_path):
-            os.makedirs(config_path)
-
-        config_file_path = config_path.joinpath(self.CONFIG_FILE_NAME)
-
-        if not os.path.exists(config_file_path):
-            shutil.copyfile(self.script_dir()+"/../config/{}.example".format(self.CONFIG_FILE_NAME),config_file_path)
-
+        :param dct: dict onto which the merge is executed
+        :param merge_dct: dct merged into dct
+        :return: None
+        """
+        for k, v in merge_dct.items():
+            if (k in dct and isinstance(dct[k], dict)
+                    and isinstance(merge_dct[k], collections.Mapping)):
+                self.dict_merge(dct[k], merge_dct[k])
+            else:
+                dct[k] = merge_dct[k]
 
     def parse_args(self):
 
@@ -327,7 +366,7 @@ class IssueAppender:
 
         parser = argparse.ArgumentParser(description="A JIRA issue selector for git messages",formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         parser.add_argument('-n', '--num-results', type=int, default=5, help='The number of results to show on screen', metavar='num_results_to_show')
-        parser.add_argument('-gc', '--global-config-path', default=self.config_dir().joinpath("jira.conf"), help='The relative path to the global configuration file. The global config file is still used', metavar='path_to_global_config_file')
+        parser.add_argument('-gc', '--global-config-path', default=self.global_config_path(), help='The relative path to the global configuration file. The global config file is still used', metavar='path_to_global_config_file')
 
         parser.add_argument('-u', '--update-cache', action='store_true', help='Update the issue cache. This happens automatically according to the config (usually), but can be manually controlled from here.')
 
@@ -340,14 +379,15 @@ class IssueAppender:
 
         args = parser.parse_args()
 
-        config_path = args.config_path
+        config_path = args.global_config_path
 
         self.cache_file_path = self.config_dir().joinpath( "{2}/{0}.{1}.cache".format(self.get_git_root_dir(), self.get_git_branch(),self.ISSUES_FOLDER_NAME) )
         self.issue_file = args.issue_file
 
         self.config = self.load_config(config_path)
-        #Configure UI
-        self.apply_config(self.config)
+        #Load the configuration system
+        #TODO: add extra config_path
+        self.configure()
 
         self.update_on_start = args.update_cache
         #DEBUG

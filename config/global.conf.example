@@ -1,0 +1,28 @@
+Main:
+
+    # ----- THESE ARE MANDATORY -----
+    # JIRA API Key
+
+    Username: "USER_EMAIL_HERE"
+    Api Key: "API_KEY_HERE"
+    # Search URL, usually https://<YOUR_SITE>.atlassian.net/rest/api/2/search
+    Search URL: "https://<YOUR_SITE>.atlassian.net/rest/api/2/search"
+    # ----- END MANDATORY SECTION -----
+
+
+    # How many issues to show
+    Max Responses: 4
+    # Refresh the issue cache every n minutes
+    Refresh Interval: 1440
+
+
+Jira:
+    # Global result filters
+    Filter:
+        # Global filters don't always make sense, but seeing as how
+        # your name doesn't change often, you can probably drop it here
+        #Assignee: Your Name
+        #Issue Resolution: Unresolved
+
+# Note: You can also use statements from the local config, here
+# ...but you probably shouldn't
