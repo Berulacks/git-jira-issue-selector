@@ -9,6 +9,9 @@ import time
 
 import sys,os,pathlib,shutil
 
+# For saving cache info on a per-repo basis
+import git
+
 
 class IssueAppender:
 
@@ -194,6 +197,10 @@ class IssueAppender:
         if self.dry_run or self.no_cache:
             return
         
+        # In case we don't have the requisite folder structure for our cache
+        if not os.path.exists( pathlib.Path( path ).parent ):
+            os.makedirs( pathlib.Path(path).parent )
+
         with open(path,"w+") as cache_file :
             cache_file.write( "{}\n".format( time.time() ) )
             cache_file.writelines('\n'.join(self.sorted_issues.copy()))
@@ -254,6 +261,27 @@ class IssueAppender:
         if exit:
             exit(0)
 
+    def get_git_root_dir(self):
+        path = os.getcwd()
+        
+        git_repo = git.Repo(path, search_parent_directories=True)
+        git_root = git_repo.git.rev_parse("--show-toplevel")
+
+        return os.path.basename(git_root)
+
+
+    def get_git_branch(self):
+        path = os.getcwd()
+        
+        git_repo = git.Repo(path, search_parent_directories=True)
+        git_branch = git_repo.git.branch()
+
+        if "* " in git_branch:
+            git_branch = git_branch.split(" ")
+            return git_branch[1]
+
+        return git_branch
+
     def init_sys(self):
 
         config_path = self.config_dir()
@@ -287,7 +315,7 @@ class IssueAppender:
 
         config_path = args.config_path
         # TODO: Change this to use the config path, and append the current git branch and repo name to it
-        self.cache_file_path = os.getcwd() + "/.issue_cache"
+        self.cache_file_path = self.config_dir().joinpath( "issues/{0}.{1}.cache".format(self.get_git_root_dir(), self.get_git_branch()) )
         self.ISSUE_FILE = args.issue_file
 
         self.config = self.load_config(config_path)
