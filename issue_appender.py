@@ -14,6 +14,9 @@ class IssueAppender:
     QUERY_TEXT = "Search for issue: "
     # By default print 5 issues at a time
     NUM_RESULTS = 7
+    # By default refresh the issues every n minutes
+    refresh_interval = 1440
+    ISSUE_FILE = "current_jira_issue"
 
     def __init__(self):
 
@@ -31,13 +34,22 @@ class IssueAppender:
         if selected_issue is not None:
             self.save_issue(selected_issue)
             self.write_to_cache(self.cache_file_path)
+            self.selected_issue = selected_issue
 
-        print("Length of issues: {}, and sorted issues: {}".format(len(self.issues),len(self.sorted_issues)))
-        
+        return select_issue
 
     def save_issue(self,issue_to_save):
+
         if self.dry_run:
             return
+
+        file_path = self.script_dir() + "/" + self.ISSUE_FILE
+        issue_key = issue_to_save.split(" ")[0]
+
+        with open(file_path,"w+") as issue_file:
+            issue_file.write(issue_key)
+
+
 
     def select_issue(self):
         #I FEEL BLESSED
@@ -121,9 +133,23 @@ class IssueAppender:
         self.sorted_issues = issues.copy()
 
     def is_cache_expired(self):
+        if self.time_stamp is not None:
+            current_time = time.time()
+            # The time, in seconds, between now and when the cache was updated
+            diff = current_time-self.time_stamp
+
+            # Convert to minutes
+            diff /= 60
+
+            #print("Diff: {}".format(diff))
+            #exit()
+
+            return diff > self.refresh_interval
+
         return False
 
     def refresh_responses_from_net(self):
+            print("Refreshing responses from network...",end="",flush=True)
             response = self.connector.search_issues(self.project_key,self.assignee_name,self.issue_resolution)
             issues = self.connector.build_issues_array(response)
             return issues
@@ -135,10 +161,12 @@ class IssueAppender:
             #print(issues)
         else:
             issues = self.read_from_cache(self.cache_file_path)
-            if self.is_cache_expired():
+            if issues == None or self.is_cache_expired():
                 issues = self.refresh_responses_from_net()
+                # Shitty to do this here, but write to cache does need it
+                self.sorted_issues = issues
                 # Hey, our cache exists at this point, might as well keep it up to date
-                self.write_to_cache()
+                self.write_to_cache(self.cache_file_path)
             
         return issues
 
@@ -151,6 +179,8 @@ class IssueAppender:
                 self.NUM_RESULTS = config["Main"]["Max Responses"]
             if "Cache File" in config["Main"]:
                 self.cache_file_path = config["Main"]["Cache File"]
+            if "Refresh Interval" in config["Main"]:
+                self.refresh_interval = config["Main"]["Refresh Interval"]
 
         if "Filter" in config["Jira"]:
             self.assignee_name = config["Jira"]["Filter"].get("Assignee")
@@ -158,6 +188,9 @@ class IssueAppender:
             self.issue_resolution = config["Jira"]["Filter"].get("Issue Resolution")
 
     def write_to_cache(self,path):
+
+        if self.dry_run:
+            return
         
         with open(path,"w+") as cache_file :
             cache_file.write( "{}\n".format( time.time() ) )
@@ -170,13 +203,16 @@ class IssueAppender:
         with open(path,'r') as cache_file :
             issues = cache_file.readlines()
             #The first line is always the timestamp
-            self.time_stamp = issues[0]
+            self.time_stamp = int( round( float( issues[0].strip() ) ) )
             # Strip the timestamp from the array
             issues = issues[1:]
             # Strip any newlines
             issues = [ line.strip() for line in issues ]
 
-        return issues
+            return issues
+        
+        # If we're here something went wrong reading from the cache
+        return None
 
     def load_config(self,path):
 
@@ -215,6 +251,9 @@ class IssueAppender:
         #self.update_on_start = True
 
         self.dry_run = args.dry_run
+        if args.dry_run:
+            print("[DRY RUN]")
+
         self.NUM_RESULTS = args.num_results
 
         if args.edit_conf:
@@ -223,3 +262,4 @@ class IssueAppender:
 
 if __name__ == '__main__':
     ins = IssueAppender()
+    return ins.select_issue
