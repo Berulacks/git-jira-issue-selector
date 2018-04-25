@@ -11,10 +11,10 @@ setup(
     author="<YOUR_NAME_HERE>",
     author_email="derin@ml1.net",
 
-    license='GPLv3'
+    license='GPLv3',
 
     # Packages
-    packages=["issue_appender"],
+    packages=['issue_appender'],
 
     # Include additional files into the package
     include_package_data=True,
@@ -28,7 +28,7 @@ setup(
 
     long_description=open("README.txt").read(),
 
-    scripts=['bin/git-jira-commit']
+    scripts=['bin/git-jira-commit'],
 
     # Dependent packages (distributions)
     install_requires=[
@@ -47,5 +47,6 @@ setup(
         'urllib3==1.22',
         'wcwidth==0.1.7'
     ],
+    zip_safe=False
 )
 
