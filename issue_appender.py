@@ -6,10 +6,14 @@ import operator
 import argparse, code
 import time
 
-import sys,os
+import sys,os,pathlib,shutil
 
 
 class IssueAppender:
+
+    # Default names for configuration
+    CONFIG_DIR_NAME = "jira_issue_appender"
+    CONFIG_FILE_NAME = "jira.conf"
 
     QUERY_TEXT = "Search for issue: "
     # By default print 5 issues at a time
@@ -197,26 +201,43 @@ class IssueAppender:
 
         issues = []
 
-        with open(path,'r') as cache_file :
-            issues = cache_file.readlines()
-            #The first line is always the timestamp
-            self.time_stamp = int( round( float( issues[0].strip() ) ) )
-            # Strip the timestamp from the array
-            issues = issues[1:]
-            # Strip any newlines
-            issues = [ line.strip() for line in issues ]
+        if os.path.exists(path):
+            with open(path,'r') as cache_file :
+                issues = cache_file.readlines()
+                #The first line is always the timestamp
+                self.time_stamp = int( round( float( issues[0].strip() ) ) )
+                # Strip the timestamp from the array
+                issues = issues[1:]
+                # Strip any newlines
+                issues = [ line.strip() for line in issues ]
 
-            return issues
+                return issues
         
         # If we're here something went wrong reading from the cache
         return None
 
     def load_config(self,path):
 
-        with open(path, 'r') as config_file:
-            global_config = yaml.load( config_file )
+        if os.path.exists(path):
+            with open(path, 'r') as config_file:
+                global_config = yaml.load( config_file )
 
-        return global_config
+            return global_config
+
+        # uh oh, no config could be found
+        if pathlib.Path(path).parent == self.config_dir():
+
+            # If this is the default config that isn't there, lets create it
+            self.init_sys()
+            # Ask the user to configure the program
+            print("First time setup complete, configuration required. Press any key to continue.".format(path))
+            blessed.Terminal().inkey()
+            self.edit_file(self.config_dir().joinpath(self.CONFIG_FILE_NAME))
+
+            return self.load_config(self.config_dir().joinpath(self.CONFIG_FILE_NAME))
+
+        print("[ERROR] Could not load config from path {}".format(path))
+        exit(1)
 
     def results_to_show(self):
         return min(self.NUM_RESULTS, len(self.issues))
@@ -224,17 +245,40 @@ class IssueAppender:
     def script_dir(self):
         return os.path.dirname(os.path.realpath(__file__))
 
+    def config_dir(self):
+        return pathlib.Path.home().joinpath(".config/{}".format(self.CONFIG_DIR_NAME))
+    
+    def edit_file(self,path,exit=False):
+        os.system("$EDITOR {0}".format(path))
+        if exit:
+            exit(0)
+
+    def init_sys(self):
+
+        config_path = self.config_dir()
+
+        if not os.path.exists(config_path):
+            os.makedirs(config_path)
+
+        config_file_path = config_path.joinpath(self.CONFIG_FILE_NAME)
+
+        if not os.path.exists(config_file_path):
+            shutil.copyfile(self.script_dir()+"/{}.example".format(self.CONFIG_FILE_NAME),config_file_path)
+
     def parse_args(self):
+
+        home = pathlib.Path.home()
+
         parser = argparse.ArgumentParser(description="A JIRA issue selector for git messages",formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         parser.add_argument('-n', '--num-results', type=int, default=5, help='The number of results to show on screen', metavar='num_results_to_show')
-        parser.add_argument('-c', '--config-path', default=self.script_dir()+"/jira.conf", help='The relative path to the configuration file.', metavar='path_to_config_file')
+        parser.add_argument('-c', '--config-path', default=self.config_dir().joinpath("jira.conf"), help='The relative path to the configuration file.', metavar='path_to_config_file')
 
         parser.add_argument('-u', '--update-cache', action='store_true', help='Update the issue cache. This happens automatically according to the config (usually), but can be manually controlled from here.')
 
         parser.add_argument('-e', '--edit-conf', action='store_true', help='Drops the user into an editor to edit their configuration file. The $EDITOR shell variable must be set for this')
         parser.add_argument('-d', '--dry-run', action='store_true', help='Does not save anything to the disk (cache or otherwise)')
 
-        parser.add_argument(dest="issue_file", type=str, default=self.script_dir()+"/selected_issue", help='The selected issue will be written to this file, if passed. Use this to actually receive the output of the program. I recommend using mktemp to generate this file path.', metavar='issue_file_to_write_to')
+        parser.add_argument(dest="issue_file", type=str, help='The selected issue will be written to this file, if passed. Use this to actually receive the output of the program. I recommend using mktemp to generate this file path.', metavar='issue_file_to_write_to')
 
         args = parser.parse_args()
 
@@ -257,8 +301,7 @@ class IssueAppender:
         self.NUM_RESULTS = args.num_results
 
         if args.edit_conf:
-            os.system("$EDITOR {0}".format(config_path))
-            exit()
+            self.edit_file(config_path,True)
 
 if __name__ == '__main__':
 

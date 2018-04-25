@@ -1,4 +1,5 @@
 Main:
+    # How many issues to show
     Max Responses: 4
     
     # Refresh the issue cache every n minutes
@@ -10,13 +11,15 @@ Main:
 Jira:
     # Filter results for:
     Filter:
-        #Assignee: <YOUR_NAME_HERE>
-        Project: PNAME
+        # You probably want to fill these out,
+        # ...but you can uncomment what you don't need
+        Assignee: Your Name
+        Project: Your project key (such as PNAME or PNAME)
         Issue Resolution: Unresolved
 
     # JIRA API Key
-    Username: "<YOUR_ATLASSIAN_EMAIL>"
-    Api Key: "<YOUR_API_KEY_HERE>"
+    Username: "user@domain"
+    Api Key: "your_api_key"
     
     # A custom JQL query (if necessary; overrides previous fields)
     # JQL: "project = PNAME AND assignee = 'Esteban Panchero'"
