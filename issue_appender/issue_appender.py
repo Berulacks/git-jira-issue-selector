@@ -286,6 +286,7 @@ class IssueAppender:
         args = parser.parse_args()
 
         config_path = args.config_path
+        # TODO: Change this to use the config path, and append the current git branch and repo name to it
         self.cache_file_path = os.getcwd() + "/.issue_cache"
         self.ISSUE_FILE = args.issue_file
 
