@@ -17,7 +17,11 @@ class IssueAppender:
 
     # Default names for configuration
     CONFIG_DIR_NAME = "jira_issue_appender"
-    CONFIG_FILE_NAME = "jira.conf"
+    GLOBAL_CONFIG_FILE_NAME = "jira.conf"
+
+    ISSUES_FOLDER_NAME = "issues"
+    LOCAL_CONFIGS_FOLDER_NAME = "configs"
+    LOCAL_CONFIGS_PREFIX = "localconfig"
 
     QUERY_TEXT = "Search for issue: "
     # By default print 5 issues at a time
@@ -51,7 +55,7 @@ class IssueAppender:
         if self.dry_run:
             return
 
-        file_path = self.ISSUE_FILE
+        file_path = self.issue_file
         issue_key = issue_to_save.split(" ")[0]
 
         with open(file_path,"w+") as issue_file:
@@ -231,21 +235,39 @@ class IssueAppender:
                 global_config = yaml.load( config_file )
 
             return global_config
+        return None
 
-        # uh oh, no config could be found
-        if pathlib.Path(path).parent == self.config_dir():
+    def init_configs(self):
+        global_config_path = self.config_dir().joinpath("jira.conf")
+        local_config_path = self.config_dir().joinpath( "{2}/{0}.{1}.{3}".format(self.get_git_root_dir(), self.get_git_branch(),self.LOCAL_CONFIGS_FOLDER_NAME,self.LOCAL_CONFIGS_PREFIX) )
+
+        final_conf = {}
+
+        # Load Global config
+        global_conf = self.load_config(global_config_path)
+        if global_conf is None:
+            # uh oh, no config could be found
 
             # If this is the default config that isn't there, lets create it
             self.init_sys()
             # Ask the user to configure the program
             print("First time setup complete, configuration required. Press any key to continue.".format(path))
             blessed.Terminal().inkey()
-            self.edit_file(self.config_dir().joinpath(self.CONFIG_FILE_NAME))
+            self.edit_file(global_config_path,False)
+            
+            print("Config generated. Please try again. Remember, you can always call `issue_appender -e` to edit the global config".format(path))
+            blessed.Terminal().inkey()
 
-            return self.load_config(self.config_dir().joinpath(self.CONFIG_FILE_NAME))
+            exit(0)
 
-        print("[ERROR] Could not load config from path {}".format(path))
-        exit(1)
+        local_conf = self.load_config(local_config_path)
+        if local_conf is None:
+
+
+
+    def load_global_config(self):
+
+    def load_local_config(self):
 
     def results_to_show(self):
         return min(self.NUM_RESULTS, len(self.issues))
@@ -253,8 +275,12 @@ class IssueAppender:
     def script_dir(self):
         return os.path.dirname(os.path.realpath(__file__))
 
-    def config_dir(self):
-        return pathlib.Path.home().joinpath(".config/{}".format(self.CONFIG_DIR_NAME))
+    def local_configs_dir(self):
+        return pathlib.Path.home().joinpath(".config/{0}/{1}".format(self.CONFIG_DIR_NAME,self.LOCAL_CONFIGS_FOLDER_NAME))
+
+    def global_config_path(self):
+        return pathlib.Path.home().joinpath(".config/{}/{}".format(self.CONFIG_DIR_NAME,self.CONFIG_FILE_NAME))
+
     
     def edit_file(self,path,exit=False):
         os.system("$EDITOR {0}".format(path))
@@ -294,13 +320,14 @@ class IssueAppender:
         if not os.path.exists(config_file_path):
             shutil.copyfile(self.script_dir()+"/../config/{}.example".format(self.CONFIG_FILE_NAME),config_file_path)
 
+
     def parse_args(self):
 
         home = pathlib.Path.home()
 
         parser = argparse.ArgumentParser(description="A JIRA issue selector for git messages",formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         parser.add_argument('-n', '--num-results', type=int, default=5, help='The number of results to show on screen', metavar='num_results_to_show')
-        parser.add_argument('-c', '--config-path', default=self.config_dir().joinpath("jira.conf"), help='The relative path to the configuration file.', metavar='path_to_config_file')
+        parser.add_argument('-gc', '--global-config-path', default=self.config_dir().joinpath("jira.conf"), help='The relative path to the global configuration file. The global config file is still used', metavar='path_to_global_config_file')
 
         parser.add_argument('-u', '--update-cache', action='store_true', help='Update the issue cache. This happens automatically according to the config (usually), but can be manually controlled from here.')
 
@@ -314,9 +341,9 @@ class IssueAppender:
         args = parser.parse_args()
 
         config_path = args.config_path
-        # TODO: Change this to use the config path, and append the current git branch and repo name to it
-        self.cache_file_path = self.config_dir().joinpath( "issues/{0}.{1}.cache".format(self.get_git_root_dir(), self.get_git_branch()) )
-        self.ISSUE_FILE = args.issue_file
+
+        self.cache_file_path = self.config_dir().joinpath( "{2}/{0}.{1}.cache".format(self.get_git_root_dir(), self.get_git_branch(),self.ISSUES_FOLDER_NAME) )
+        self.issue_file = args.issue_file
 
         self.config = self.load_config(config_path)
         #Configure UI

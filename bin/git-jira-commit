@@ -1,7 +1,17 @@
 #!/bin/bash
 
-TEMP_FILE=${mktemp}
-python -m issue_appender $TEMP_FILE
+TEMP_FILE="$(mktemp)"
+
+python_version="$(echo "$(python -V 2>&1)" | sed -e "s/^.* \(.*\)$/\\1/g")"
+
+if [ "$python_version" -lt "3.0" ]
+then
+	echo "Error: Python version is less than 3! The fuck is wrong with you"
+
+fi
+
+
+python3 -m issue_appender $TEMP_FILE
 git commit -t $TEMP_FILE
 
 rm $TEMP_FILE
