@@ -6,9 +6,6 @@ from blessed import Terminal
 
 class JiraConnector:
 
-    API_URL = "https://<COMPANY_NAME>.atlassian.net"
-    SEARCH_URL = "https://<COMPANY_NAME>.atlassian.net/rest/api/2/search"
-
     def __init__(self,config):
 
         self.apply_config(config)
@@ -17,6 +14,7 @@ class JiraConnector:
     def apply_config(self,config):
         self.user_name = config["Jira"]["Username"]
         self.api_key = config["Jira"]["Api Key"]
+        self.search_url = config["Jira"]["Search URL"]
 
     # Converts a GET Json response dict to a list of searchable strings
     def build_issues_array(self,response):
@@ -67,7 +65,7 @@ class JiraConnector:
 
         headers = {"Accept":"application/json"}
 
-        url = self.SEARCH_URL
+        url = self.search_url
 
         payload = { "jql":jql, "fields":fields }
 

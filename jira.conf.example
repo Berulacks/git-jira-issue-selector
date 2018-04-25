@@ -20,6 +20,9 @@ Jira:
     # JIRA API Key
     Username: "user@domain"
     Api Key: "your_api_key"
+
+    # Search URL, usually https://<YOUR_SITE>.atlassian.net/rest/api/2/search
+    Search URL: "https://<YOUR_SITE>.atlassian.net/rest/api/2/search"
     
     # A custom JQL query (if necessary; overrides previous fields)
     # JQL: "project = PNAME AND assignee = 'Esteban Panchero'"
