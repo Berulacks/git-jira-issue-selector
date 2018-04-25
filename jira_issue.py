@@ -25,10 +25,32 @@ class JiraConnector:
         for issue in response["issues"]:
             fields = issue["fields"]
             key = issue["key"]
-            list.append("[{0}] {1} {2} - {3}".format(key,fields["summary"],fields["fixVersions"][0]["name"],fields["assignee"]["displayName"]))
+
+            list.append(self.build_issue_string(issue))
+            #if "fixVersions" in fields and len(fields["fixVersions"]) > 0:
+            #    list.append("[{0}] {1} {2} - {3}".format(key,fields["summary"],fields["fixVersions"][0]["name"],fields["assignee"]["displayName"]))
+            #else:
+            #    list.append("[{0}] {1} - {2}".format(key,fields["summary"],fields["assignee"]["displayName"]))
+
 
         return list
         
+    def build_issue_string(self,issue):
+
+            fields = issue["fields"]
+            key = issue["key"]
+
+            to_return = "[{0}] ".format(key)
+
+            if "summary" in fields:
+                to_return += "{} ".format(fields["summary"])
+            if "fixVersions" in fields and len(fields["fixVersions"]) > 0:
+                to_return += "{} ".format(fields["fixVersions"][0]["name"])
+            if "assignee" in fields and fields["assignee"] is not None:
+                to_return += "- {}".format(fields["assignee"]["displayName"])
+
+            return to_return
+
     #Wrapper around make_request to search for an issue and filter according to user
     def search_issues(self,project,assignee=None,resolution=None,fields=None):
 

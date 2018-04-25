@@ -74,10 +74,13 @@ class IssueAppender:
     def update_results(self,term,query=""):
 
         issues = self.issues
+        num_issues = self.results_to_show()
+
+        max_index = -1 if num_issues > len(issues) else num_issues
 
         if len(query) > 0:
             # Perform the sort
-            scored_results = process.extract(query,issues,limit=self.results_to_show() )
+            scored_results = process.extract(query,issues,limit=num_issues )
             #print(scored_results)
             #term.inkey()
 
@@ -88,17 +91,17 @@ class IssueAppender:
             
 
         # Print the issues
-        with term.location(x=0,y=term.height - self.results_to_show() - 1):
-            for query in issues[:-1]:
+        with term.location(x=0,y=term.height - num_issues - 1):
+            for query in issues[:max_index-1]:
                 term.clear_eol()
                 print(term.clear_eol()+query)
 
             # Print the LAST item of the list without the trailing newline, important to preserve our UI
             term.clear_eol()
-            print(term.clear_eol+issues[-1], end='')
+            print(term.clear_eol+issues[max_index-1], end='')
 
         # Update the global list?
-        self.issues = issues
+        #self.issues = issues
 
     def get_responses(self):
         response = self.connector.search_issues(self.project_key,self.assignee_name,self.issue_resolution)
@@ -115,9 +118,10 @@ class IssueAppender:
         if "Main" in config and "Max Responses" in config["Main"]:
             self.NUM_RESULTS = config["Main"]["Max Responses"]
 
-        self.assignee_name = config["Jira"]["Filter"]["Assignee"]
-        self.project_key = config["Jira"]["Filter"]["Project"]
-        self.issue_resolution = config["Jira"]["Filter"]["Issue Resolution"]
+        if "Filter" in config["Jira"]:
+            self.assignee_name = config["Jira"]["Filter"].get("Assignee")
+            self.project_key = config["Jira"]["Filter"].get("Project")
+            self.issue_resolution = config["Jira"]["Filter"].get("Issue Resolution")
 
     def load_config(self,path):
 
