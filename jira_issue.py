@@ -30,7 +30,7 @@ class JiraConnector:
         return list
         
     #Wrapper around make_request to search for an issue and filter according to user
-    def search_issues(self,project,assignee=None,fields=None):
+    def search_issues(self,project,assignee=None,resolution=None,fields=None):
 
         if fields is not None:
             fields = ["summary","status","fixVersions","assignee"]
@@ -40,7 +40,8 @@ class JiraConnector:
         if assignee is not None:
             jql += " AND assignee = '{0}'".format(assignee)
 
-        jql += " AND resolution = unresolved"
+        if resolution is not None:
+            jql += " AND resolution = {0}".format(resolution)
 
         headers = {"Accept":"application/json"}
 

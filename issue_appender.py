@@ -101,7 +101,7 @@ class IssueAppender:
         self.issues = issues
 
     def get_responses(self):
-        response = self.connector.search_issues(self.project_key,self.assignee_name)
+        response = self.connector.search_issues(self.project_key,self.assignee_name,self.issue_resolution)
         issues = self.connector.build_issues_array(response)
 
         #print(issues)
@@ -115,8 +115,9 @@ class IssueAppender:
         if "Main" in config and "Max Responses" in config["Main"]:
             self.NUM_RESULTS = config["Main"]["Max Responses"]
 
-        self.assignee_name = config["Jira"]["Assignee"]
-        self.project_key = config["Jira"]["Project"]
+        self.assignee_name = config["Jira"]["Filter"]["Assignee"]
+        self.project_key = config["Jira"]["Filter"]["Project"]
+        self.issue_resolution = config["Jira"]["Filter"]["Issue Resolution"]
 
     def load_config(self,path):
 
