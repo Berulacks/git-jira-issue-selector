@@ -158,7 +158,7 @@ class IssueAppender:
 
     def get_responses(self):
 
-        if self.update_on_start:
+        if self.update_on_start or self.no_cache:
             issues = self.refresh_responses_from_net()
             #print(issues)
         else:
@@ -191,7 +191,7 @@ class IssueAppender:
 
     def write_to_cache(self,path):
 
-        if self.dry_run:
+        if self.dry_run or self.no_cache:
             return
         
         with open(path,"w+") as cache_file :
@@ -278,6 +278,8 @@ class IssueAppender:
 
         parser.add_argument('-e', '--edit-conf', action='store_true', help='Drops the user into an editor to edit their configuration file. The $EDITOR shell variable must be set for this')
         parser.add_argument('-d', '--dry-run', action='store_true', help='Does not save anything to the disk (cache or otherwise)')
+        parser.add_argument('-nc', '--no-cache', action='store_true', help='Disables reading and writing to the cache')
+
 
         parser.add_argument(dest="issue_file", type=str, help='The selected issue will be written to this file, if passed. Use this to actually receive the output of the program. I recommend using mktemp to generate this file path.', metavar='issue_file_to_write_to')
 
@@ -300,6 +302,7 @@ class IssueAppender:
             print("[DRY RUN]")
 
         self.NUM_RESULTS = args.num_results
+        self.no_cache = args.no_cache
 
         if args.edit_conf:
             self.edit_file(config_path,True)
