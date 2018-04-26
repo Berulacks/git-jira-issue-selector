@@ -1,5 +1,8 @@
 from distutils.core import setup
 
+def readme():
+    with open('README.txt') as f:
+        return f.read()
 setup(
     # Application name:
     name="JiraIssueSelector",
@@ -30,7 +33,7 @@ setup(
     # license="LICENSE.txt",
     description="Allows you to quickly select and prepend JIRA issues to git commit messages",
 
-    long_description=open("README.txt").read(),
+    long_description=readme(),
 
     scripts=[
         'bin/git-jira-commit',
