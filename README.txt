@@ -1,3 +1,23 @@
+
+Install: 
+
+Just run: pip3 install <the file>
+
+Configuration:
+
+The Issue Selector needs to be configured globally, once; and then again one
+time for every project.
+
+To configure it globally type: git-jira-config
+To configure it locally type (while in a git repository): git-jira-config local
+
+If these files are not found by default, the program will automatically
+generate them and prompt you to edit them. This only happens on first-run.
+
+For further questions reach me on slack @derin or through email: derin@ml1.net
+
+Usage: 
+
 usage: __main__.py [-h] [-n num_results_to_show] [-c path_to_config_file] [-u]
                    [-e] [-d] [-nc]
                    issue_file_to_write_to
