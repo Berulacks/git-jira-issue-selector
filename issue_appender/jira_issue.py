@@ -80,7 +80,11 @@ class JiraConnector:
 
         #TODO just use **kwargs instead of headers and payload?
         response = requests.get(url, auth=(self.user_name,self.api_key), params=payload)
-        json_data = json.loads(response.text)
+        try:
+            json_data = json.loads(response.text)
+        except:
+            print("[ERROR] Could not process response as json, something went wrong. Dumping...\nResponse: {}".format(response.text))
+            exit(1)
 
         #print( "Raw data: {0}\n".format(json_data["issues"]) )
 

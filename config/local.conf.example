@@ -6,8 +6,8 @@ Jira:
     Filter:
         # You probably want to fill these out,
         # ...but you can uncomment what you don't need
-        #Assignee: Your Name
-        Project: Your project key (such as PNAME or PNAME)
+        #Assignee: <YOUR_NAME>
+        Project: <YOUR_PROJECT_KEY> #(such as PNAME or PNAME)
         Issue Resolution: Unresolved
     
     # A custom JQL query (if necessary; overrides previous fields)

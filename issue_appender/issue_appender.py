@@ -293,6 +293,7 @@ class IssueAppender:
             # If this is the default config that isn't there, lets create it
             #self.init_sys()
             self.init_config_system(global_config_path)
+            self.add_title_to_file(global_config_path, "# -- Global Configuration File --\n")
             # Ask the user to configure the program
             print("First time setup complete, configuration required. Press any key to continue.")
             blessed.Terminal().inkey()
@@ -306,7 +307,7 @@ class IssueAppender:
         local_conf = self.load_config(local_config_path)
         if local_conf is None:
             print("First time local setup complete, configuration required. Press any key to continue.")
-            print("Copying from {1} to {0}".format(local_config_path,self.script_dir()+"/../config/{}.example".format(self.LOCAL_CONFIGS_PREFIX)))
+            #print("Copying from {1} to {0}".format(local_config_path,self.script_dir()+"/../config/{}.example".format(self.LOCAL_CONFIGS_PREFIX)))
             self.init_config_system(local_config_path,self.script_dir()+"/../config/{}.example".format(self.LOCAL_CONFIGS_PREFIX))
             self.add_title_to_file(local_config_path, "# -- Local Configuration file for Project: {0}, Branch: {1} --\n".format(git_root,git_branch))
 
