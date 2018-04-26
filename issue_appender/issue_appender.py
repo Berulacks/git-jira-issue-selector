@@ -238,9 +238,23 @@ class IssueAppender:
             return global_config
         return None
 
+    def add_title_to_file(self,path, line_to_write, drop_original_title=True):
+        with open(path, "r") as sources:
+            lines = sources.readlines()
+        with open(path, "w") as sources:
+            sources.write(line_to_write)
+            if drop_original_title:
+                sources.writelines(lines[1:])
+            else:
+                sources.writelines(lines)
+        
+
     def configure(self):
+        git_root = self.get_git_root_dir()
+        git_branch = self.get_git_branch()
+
         global_config_path = self.config_dir().joinpath(self.GLOBAL_CONFIG_FILE_NAME)
-        local_config_path = self.config_dir().joinpath( "{2}/{0}.{1}.{3}".format(self.get_git_root_dir(), self.get_git_branch(),self.LOCAL_CONFIGS_FOLDER_NAME,self.LOCAL_CONFIGS_PREFIX) )
+        local_config_path = self.config_dir().joinpath( "{2}/{0}.{1}.{3}".format(git_root, git_branch,self.LOCAL_CONFIGS_FOLDER_NAME,self.LOCAL_CONFIGS_PREFIX) )
 
         # In case another function needs these
         self.global_config_path = global_config_path
@@ -271,6 +285,8 @@ class IssueAppender:
             print("First time local setup complete, configuration required. Press any key to continue.")
             print("Copying from {1} to {0}".format(local_config_path,self.script_dir()+"/../config/{}.example".format(self.LOCAL_CONFIGS_PREFIX)))
             self.init_config_system(local_config_path,self.script_dir()+"/../config/{}.example".format(self.LOCAL_CONFIGS_PREFIX))
+            self.add_title_to_file(local_config_path, "# -- Local Configuration file for Project: {0}, Branch: {1}\n".format(git_root,git_branch))
+
             blessed.Terminal().inkey()
             self.edit_file(local_config_path,False)
 
