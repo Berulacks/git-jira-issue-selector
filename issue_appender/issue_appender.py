@@ -142,6 +142,14 @@ class IssueAppender:
         # Update the global sorted list
         self.sorted_issues = issues.copy()
 
+    # TODO: Compare config timestamps to determine if a refresh is needed
+    def is_config_different(self):
+
+        current_local_ts = self.current_local_config_ts()
+        current_global_ts = self.current_global_config_ts()
+
+        return  current_local_ts != self.local_conf_ts or current_global_ts != self.global_conf_ts
+
     def is_cache_expired(self):
         if self.time_stamp is not None:
             current_time = time.time()
@@ -171,7 +179,7 @@ class IssueAppender:
             #print(issues)
         else:
             issues = self.read_from_cache(self.cache_file_path)
-            if issues == None or self.is_cache_expired():
+            if issues == None or self.is_cache_expired() or self.is_config_different():
                 issues = self.refresh_responses_from_net()
                 # Shitty to do this here, but write to cache does need it
                 self.sorted_issues = issues
@@ -201,13 +209,22 @@ class IssueAppender:
 
         if self.dry_run or self.no_cache:
             return
+
+        current_local_ts = self.current_local_config_ts()
+        current_global_ts = self.current_global_config_ts()
         
         # In case we don't have the requisite folder structure for our cache
         if not os.path.exists( pathlib.Path( path ).parent ):
             os.makedirs( pathlib.Path(path).parent )
 
         with open(path,"w+") as cache_file :
+            # CACHE TIMESTAMP
             cache_file.write( "{}\n".format( time.time() ) )
+            # LOCAL TIMESTAMP
+            cache_file.write( "{}\n".format( current_local_ts ) )
+            # GLOBAL TIMESTAMP
+            cache_file.write( "{}\n".format( current_global_ts ) )
+
             cache_file.writelines('\n'.join(self.sorted_issues.copy()))
 
     def read_from_cache(self,path):
@@ -217,10 +234,16 @@ class IssueAppender:
         if os.path.exists(path):
             with open(path,'r') as cache_file :
                 issues = cache_file.readlines()
+
                 #The first line is always the timestamp
                 self.time_stamp = int( round( float( issues[0].strip() ) ) )
+                #The second line is always the local config last modified timestamp
+                self.local_conf_ts = int( round( float( issues[1].strip() ) ) )
+                #The third line is always the global config last modified timestamp
+                self.global_conf_ts = int( round( float( issues[2].strip() ) ) )
+
                 # Strip the timestamp from the array
-                issues = issues[1:]
+                issues = issues[3:]
                 # Strip any newlines
                 issues = [ line.strip() for line in issues ]
 
@@ -285,7 +308,7 @@ class IssueAppender:
             print("First time local setup complete, configuration required. Press any key to continue.")
             print("Copying from {1} to {0}".format(local_config_path,self.script_dir()+"/../config/{}.example".format(self.LOCAL_CONFIGS_PREFIX)))
             self.init_config_system(local_config_path,self.script_dir()+"/../config/{}.example".format(self.LOCAL_CONFIGS_PREFIX))
-            self.add_title_to_file(local_config_path, "# -- Local Configuration file for Project: {0}, Branch: {1}\n".format(git_root,git_branch))
+            self.add_title_to_file(local_config_path, "# -- Local Configuration file for Project: {0}, Branch: {1} --\n".format(git_root,git_branch))
 
             blessed.Terminal().inkey()
             self.edit_file(local_config_path,False)
@@ -329,6 +352,17 @@ class IssueAppender:
 
     def local_configs_dir(self):
         return pathlib.Path.home().joinpath(".config/{0}/{1}".format(self.CONFIG_DIR_NAME,self.LOCAL_CONFIGS_FOLDER_NAME))
+
+    def current_local_config_ts(self):
+        local_config_path = self.local_config_path
+
+        return os.path.getmtime(local_config_path)
+
+    def current_global_config_ts(self):
+        global_config_path = self.global_config_path
+
+        return os.path.getmtime(global_config_path)
+
 
     def global_config_path(self):
         return pathlib.Path.home().joinpath(".config/{0}/{1}".format(self.CONFIG_DIR_NAME,self.GLOBAL_CONFIG_FILE_NAME))
