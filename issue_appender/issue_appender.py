@@ -30,6 +30,9 @@ class IssueAppender:
     # By default refresh the issues every n minutes
     refresh_interval = 1440
 
+    # The currently selected issue
+    selected_issue = 0
+
     def __init__(self):
 
         # Parse command line arguments
@@ -94,9 +97,11 @@ class IssueAppender:
                 else:
                     # ...or just a normal letter?
                     query += key
+                    # Lets reset our selected issue, too
+                    self.selected_issue = 0
 
                 if key == "KEY_ENTER":
-                    return self.sorted_issues[0]
+                    return self.sorted_issues[self.selected_issue]
 
                 if key == "KEY_ESCAPE":
                     return None
@@ -104,10 +109,29 @@ class IssueAppender:
                 if key == "KEY_DELETE":
                     query = query[:-1]
 
+                # Move up/down the list?
+                if key == "KEY_UP":
+                    self.update_selected_issue(True)
+                if key == "KEY_DOWN":
+                    self.update_selected_issue(False)
+
                 # Update the cursory position, query results, and query text
                 print(term.move(self.start_location[0],len(self.QUERY_TEXT+query)),end='',flush=True)
                 self.update_search_query(term,query)
                 self.update_results(term,query)
+
+    def update_selected_issue(self,direction_up):
+
+        increment_by = -1 if direction_up else 1
+
+        self.selected_issue += increment_by
+        #print(self.selected_issue)
+        #blessed.Terminal().inkey()
+
+        if self.selected_issue >= self.results_to_show():
+            self.selected_issue = 0
+        elif self.selected_issue < 0:
+            self.selected_issue = self.results_to_show() - 1
 
     def update_search_query(self,term,query=""):
         # Have to do -3 here since the rows start at 1, and because we're appending a whitespace
@@ -133,7 +157,7 @@ class IssueAppender:
             issues = [ result[0] for result in scored_results ]
             
 
-        selected = 0
+        selected = self.selected_issue
         issue_number = 0
 
         # Print the issues
@@ -152,7 +176,11 @@ class IssueAppender:
 
             # Print the LAST item of the list without the trailing newline, important to preserve our UI
             term.clear_eol()
-            print(term.clear_eol+issues[max_index-1], end='')
+            if issue_number == selected:
+                print(term.black_on_white(term.clear_eol+issues[max_index-1]), end='')
+                print( term.clear_eol() + '', end='')
+            else:
+                print(term.clear_eol+issues[max_index-1], end='')
 
         # Update the global sorted list
         self.sorted_issues = issues.copy()
