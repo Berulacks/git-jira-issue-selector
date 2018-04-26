@@ -276,9 +276,10 @@ class IssueAppender:
         final_conf = global_conf 
         
         # Load the local conf onto the global
-        print(global_conf)
+        print("global conf before local added: {}".format(global_conf))
         self.dict_merge(final_conf,local_conf)
-        print (final_conf)
+        #final_conf.update(local_conf)
+        print ("final conf after merge: {}".format(final_conf))
 
         self.config = final_conf
 
@@ -343,7 +344,7 @@ class IssueAppender:
 
         return git_branch.rstrip()
 
-    def dict_merge(self,dct, merge_dct):
+    def dict_merge(self,merge_onto, merge_from):
         """ Recursive dict merge. Inspired by :meth:``dict.update()``, instead of
         updating only top-level keys, dict_merge recurses down into dicts nested
         to an arbitrary depth, updating keys. The ``merge_dct`` is merged into
@@ -353,12 +354,26 @@ class IssueAppender:
         :param merge_dct: dct merged into dct
         :return: None
         """
+        #If either of the values is none, go for the non-null one
+        if merge_onto is None:
+            return merge_from
+
+        if merge_from is None:
+            return merge_onto
+
+        dct = merge_onto
+        merge_dct = merge_from
+
         for k, v in merge_dct.items():
-            if (k in dct and isinstance(dct[k], dict)
-                    and isinstance(merge_dct[k], collections.Mapping)):
-                self.dict_merge(dct[k], merge_dct[k])
+            if ( (k in dct and isinstance(dct[k], dict) or dct[k] is None)
+                    and (isinstance(merge_dct[k], collections.Mapping) or merge_dct[k] is None ) ):
+                print("Performing recurisve merge for key {}".format(k))
+                dct[k] = self.dict_merge(dct[k], merge_dct[k])
             else:
+                print("Non recursive merge for key: {}".format(k))
                 dct[k] = merge_dct[k]
+
+        return dct
 
     def parse_args(self):
 
