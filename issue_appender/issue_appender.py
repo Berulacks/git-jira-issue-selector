@@ -133,11 +133,22 @@ class IssueAppender:
             issues = [ result[0] for result in scored_results ]
             
 
+        selected = 0
+        issue_number = 0
+
         # Print the issues
         with term.location(x=0,y=self.start_location[0]+2):
             for query in issues[:max_index-1]:
                 term.clear_eol()
-                print(term.clear_eol()+query)
+                # Print the selected issue as colorized
+                if issue_number == selected:
+                    print( term.black_on_white(term.clear_eol()+query), end='',flush=True )
+                    # Clear the remaining background color after the line is finished printing
+                    print( term.clear_eol() + '')
+                else:
+                    print(term.clear_eol()+query)
+
+                issue_number += 1
 
             # Print the LAST item of the list without the trailing newline, important to preserve our UI
             term.clear_eol()
