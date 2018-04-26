@@ -38,4 +38,4 @@ then
 	CONFIG_TYPE=$1
 fi
 
-$PYTHON_BINARY -m issue_appender -e $CONFIG_TYPE
+$PYTHON_BINARY -m jira_issue_selector -e $CONFIG_TYPE
