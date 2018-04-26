@@ -53,7 +53,7 @@ class IssueAppender:
 
     def save_issue(self,issue_to_save):
 
-        if self.dry_run:
+        if self.dry_run or len(self.issue_file) < 1:
             return
 
         file_path = self.issue_file
@@ -242,6 +242,10 @@ class IssueAppender:
         global_config_path = self.config_dir().joinpath(self.GLOBAL_CONFIG_FILE_NAME)
         local_config_path = self.config_dir().joinpath( "{2}/{0}.{1}.{3}".format(self.get_git_root_dir(), self.get_git_branch(),self.LOCAL_CONFIGS_FOLDER_NAME,self.LOCAL_CONFIGS_PREFIX) )
 
+        # In case another function needs these
+        self.global_config_path = global_config_path
+        self.local_config_path = local_config_path
+
         final_conf = {}
 
         # Load Global config
@@ -276,10 +280,9 @@ class IssueAppender:
         final_conf = global_conf 
         
         # Load the local conf onto the global
-        print("global conf before local added: {}".format(global_conf))
-        self.dict_merge(final_conf,local_conf)
-        #final_conf.update(local_conf)
-        print ("final conf after merge: {}".format(final_conf))
+        #print("global conf before local added: {}".format(global_conf))
+        final_conf = self.dict_merge(final_conf,local_conf)
+        #print ("final conf after merge: {}".format(final_conf))
 
         self.config = final_conf
 
@@ -318,10 +321,10 @@ class IssueAppender:
         return pathlib.Path.home().joinpath(".config/{0}".format(self.CONFIG_DIR_NAME))
 
     
-    def edit_file(self,path,exit=False):
+    def edit_file(self,path,exit_after_edit=False):
         os.system("$EDITOR {0}".format(path))
-        if exit:
-            exit(0)
+        if exit_after_edit:
+            exit()
 
     def get_git_root_dir(self):
         path = os.getcwd()
@@ -365,12 +368,12 @@ class IssueAppender:
         merge_dct = merge_from
 
         for k, v in merge_dct.items():
-            if ( (k in dct and isinstance(dct[k], dict) or dct[k] is None)
+            if ( (k in dct and (isinstance(dct[k], dict) or dct[k] is None))
                     and (isinstance(merge_dct[k], collections.Mapping) or merge_dct[k] is None ) ):
-                print("Performing recurisve merge for key {}".format(k))
+                #print("Performing recurisve merge for key {}".format(k))
                 dct[k] = self.dict_merge(dct[k], merge_dct[k])
             else:
-                print("Non recursive merge for key: {}".format(k))
+                #print("Non recursive merge for key: {}".format(k))
                 dct[k] = merge_dct[k]
 
         return dct
@@ -381,28 +384,32 @@ class IssueAppender:
 
         parser = argparse.ArgumentParser(description="A JIRA issue selector for git messages",formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         parser.add_argument('-n', '--num-results', type=int, default=5, help='The number of results to show on screen', metavar='num_results_to_show')
-        parser.add_argument('-gc', '--global-config-path', default=self.global_config_path(), help='The relative path to the global configuration file. The global config file is still used', metavar='path_to_global_config_file')
+        parser.add_argument('-c', '--extra-config-path', help='An extra config file to load.', metavar='path_to_config_file')
 
         parser.add_argument('-u', '--update-cache', action='store_true', help='Update the issue cache. This happens automatically according to the config (usually), but can be manually controlled from here.')
 
-        parser.add_argument('-e', '--edit-conf', action='store_true', help='Drops the user into an editor to edit their configuration file. The $EDITOR shell variable must be set for this')
+        parser.add_argument('-e', '--edit-conf', type=str, default="", help='Edit a configuration file. Valid options are global or local. The $EDITOR shell variable must be set for this', metavar='[global|local]')
         parser.add_argument('-d', '--dry-run', action='store_true', help='Does not save anything to the disk (cache or otherwise)')
         parser.add_argument('-nc', '--no-cache', action='store_true', help='Disables reading and writing to the cache')
 
 
-        parser.add_argument(dest="issue_file", type=str, help='The selected issue will be written to this file, if passed. Use this to actually receive the output of the program. I recommend using mktemp to generate this file path.', metavar='issue_file_to_write_to')
+        parser.add_argument('-i', '--issue-file', default="", type=str, help='The issue selected by the user will be written to this file, if passed. Use this to actually receive the output of the program. I recommend using mktemp to generate this file path.', metavar='issue_file_to_write_to')
 
         args = parser.parse_args()
 
-        config_path = args.global_config_path
+        extra_config_path = None
+        if args.extra_config_path is not None:
+            extra_config_path = args.extra_config_path
 
         self.cache_file_path = self.config_dir().joinpath( "{2}/{0}.{1}.cache".format(self.get_git_root_dir(), self.get_git_branch(),self.ISSUES_FOLDER_NAME) )
+
         self.issue_file = args.issue_file
 
-        self.config = self.load_config(config_path)
         #Load the configuration system
-        #TODO: add extra config_path
-        self.configure()
+        if extra_config_path is not None:
+            self.configure(extra_config_path)
+        else:
+            self.configure()
 
         self.update_on_start = args.update_cache
         #DEBUG
@@ -415,8 +422,11 @@ class IssueAppender:
         self.NUM_RESULTS = args.num_results
         self.no_cache = args.no_cache
 
-        if args.edit_conf:
-            self.edit_file(config_path,True)
+        if len(args.edit_conf) > 1:
+            if args.edit_conf == "global":
+                self.edit_file(self.global_config_path,True)
+            elif args.edit_conf == "local":
+                self.edit_file(self.local_config_path,True)
 
 if __name__ == '__main__':
 

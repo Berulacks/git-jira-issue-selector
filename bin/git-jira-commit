@@ -11,7 +11,7 @@ then
 fi
 
 
-python3 -m issue_appender $TEMP_FILE
+python3 -m issue_appender -i "$TEMP_FILE"
 git commit -t $TEMP_FILE
 
 rm $TEMP_FILE
