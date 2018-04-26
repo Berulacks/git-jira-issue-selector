@@ -353,8 +353,8 @@ class IssueSelector:
         local_conf = self.load_config(local_config_path)
         if local_conf is None:
             print("First time local setup complete, configuration required. Press any key to continue.")
-            #print("Copying from {1} to {0}".format(local_config_path,self.script_dir()+"/../config/{}.example".format(self.LOCAL_CONFIGS_PREFIX)))
-            self.init_config_system(local_config_path,self.script_dir()+"/../config/{}.example".format(self.LOCAL_CONFIGS_PREFIX))
+            #print("Copying from {1} to {0}".format(local_config_path,self.script_dir()+"/data/{}.example".format(self.LOCAL_CONFIGS_PREFIX)))
+            self.init_config_system(local_config_path,self.script_dir()+"/data/{}.example".format(self.LOCAL_CONFIGS_PREFIX))
             self.add_title_to_file(local_config_path, "# -- Local Configuration file for Project: {0}, Branch: {1} --\n".format(git_root,git_branch))
 
             if not self.edit_mode:
@@ -389,7 +389,7 @@ class IssueSelector:
         if not os.path.exists( str(path) ):
             if example_config is None:
                 # Try to guess where the example file lives...
-                shutil.copyfile(self.script_dir()+"/../config/{}.example".format(path.name),path)
+                shutil.copyfile(self.script_dir()+"/data/{}.example".format(path.name),path)
             else:
                 shutil.copyfile(example_config,path)
 

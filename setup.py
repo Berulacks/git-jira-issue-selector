@@ -16,6 +16,10 @@ setup(
     # Packages
     packages=['jira_issue_selector'],
 
+    package_data={
+        'jira_issue_selector': ['data/*']
+        },
+
     # Include additional files into the package
     include_package_data=True,
 
