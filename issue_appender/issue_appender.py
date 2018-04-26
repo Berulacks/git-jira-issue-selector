@@ -337,14 +337,17 @@ class IssueAppender:
             #self.init_sys()
             self.init_config_system(global_config_path)
             self.add_title_to_file(global_config_path, "# -- Global Configuration File --\n")
-            # Ask the user to configure the program
-            print("First time setup complete, configuration required. Press any key to continue.")
-            blessed.Terminal().inkey()
-            self.edit_file(global_config_path,False)
-            
-            print("Config generated. Please try again. Remember, you can always call `issue_appender -e global` to edit the global config")
-            blessed.Terminal().inkey()
-            exit(0)
+
+            # If we're in Edit mode then we're already here to edit the files! Lets not quit, yet
+            if not self.edit_mode:
+                # Ask the user to configure the program
+                print("First time setup complete, configuration required. Press any key to continue.")
+                blessed.Terminal().inkey()
+                self.edit_file(global_config_path,False)
+                
+                print("Config generated. Please try again. Remember, you can always call `issue_appender -e global` to edit the global config")
+                blessed.Terminal().inkey()
+                exit(0)
 
         # Load Local config (copying pasting the same code so that I can print the unique message)
         local_conf = self.load_config(local_config_path)
@@ -354,11 +357,13 @@ class IssueAppender:
             self.init_config_system(local_config_path,self.script_dir()+"/../config/{}.example".format(self.LOCAL_CONFIGS_PREFIX))
             self.add_title_to_file(local_config_path, "# -- Local Configuration file for Project: {0}, Branch: {1} --\n".format(git_root,git_branch))
 
-            blessed.Terminal().inkey()
-            self.edit_file(local_config_path,False)
+            if not self.edit_mode:
+                blessed.Terminal().inkey()
+                self.edit_file(local_config_path,False)
 
-            print("Config generated. Continuing... Remember, you can always call `issue_appender -e local` to edit the local config")
-            blessed.Terminal().inkey()
+                print("Config generated. Please try again. Remember, you can always call `issue_appender -e local` to edit the local config")
+                blessed.Terminal().inkey()
+                exit(0)
 
         final_conf = global_conf 
         
@@ -433,13 +438,17 @@ class IssueAppender:
         path = os.getcwd()
         
         git_repo = git.Repo(path, search_parent_directories=True)
-        git_branch = git_repo.git.branch()
 
-        if "* " in git_branch:
-            git_branch = git_branch.split(" ")
-            return git_branch[1].rstrip()
+        # Get branches
+        git_branches = git_repo.git.branch()
+        git_branches = git_branches.split("\n")
 
-        return git_branch.rstrip()
+        current_branch = [ branch.split(" ")[1].rstrip() for branch in git_branches if "* " in branch ]
+
+        if len(current_branch) > 0:
+            return current_branch[0]
+
+        return "UNKNOWN_BRANCH"
 
     def dict_merge(self,merge_onto, merge_from):
         """ Recursive dict merge. Inspired by :meth:``dict.update()``, instead of
@@ -491,6 +500,8 @@ class IssueAppender:
 
         args = parser.parse_args()
 
+        self.edit_mode = len(args.edit_conf) > 1
+
         extra_config_path = None
         if args.extra_config_path is not None:
             extra_config_path = args.extra_config_path
@@ -516,7 +527,7 @@ class IssueAppender:
         self.NUM_RESULTS = args.num_results
         self.no_cache = args.no_cache
 
-        if len(args.edit_conf) > 1:
+        if self.edit_mode:
             if args.edit_conf == "global":
                 self.edit_file(self.global_config_path,True)
             elif args.edit_conf == "local":
