@@ -20,7 +20,7 @@ class JiraConnector:
     def build_issues_array(self,response):
         list = []
 
-        if "issues" in response:
+        if "issues" in response and len(response["issues"]) > 0:
             for issue in response["issues"]:
                 fields = issue["fields"]
                 key = issue["key"]

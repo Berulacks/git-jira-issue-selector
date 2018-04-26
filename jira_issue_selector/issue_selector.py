@@ -233,8 +233,6 @@ class IssueSelector:
 
     def apply_config(self,config):
 
-        self.NUM_RESULTS = 7
-
         if "Main" in config and "Max Responses" in config["Main"]:
             if "Max Responses" in config["Main"]:
                 self.NUM_RESULTS = config["Main"]["Max Responses"]
@@ -486,7 +484,7 @@ class IssueSelector:
         home = pathlib.Path.home()
 
         parser = argparse.ArgumentParser(description="A JIRA issue selector for git messages",formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        parser.add_argument('-n', '--num-results', type=int, default=5, help='The number of results to show on screen', metavar='num_results_to_show')
+        parser.add_argument('-n', '--num-results', type=int, default=None, help='The number of results to show on screen', metavar='num_results_to_show')
         parser.add_argument('-c', '--extra-config-path', help='An extra config file to load.', metavar='path_to_config_file')
 
         parser.add_argument('-u', '--update-cache', action='store_true', help='Update the issue cache. This happens automatically according to the config (usually), but can be manually controlled from here.')
@@ -524,7 +522,8 @@ class IssueSelector:
         if args.dry_run:
             print("[DRY RUN]")
 
-        self.NUM_RESULTS = args.num_results
+        if args.num_results is not None:
+            self.NUM_RESULTS = args.num_results
         self.no_cache = args.no_cache
 
         if self.edit_mode:
