@@ -20,18 +20,22 @@ class JiraConnector:
     def build_issues_array(self,response):
         list = []
 
-        for issue in response["issues"]:
-            fields = issue["fields"]
-            key = issue["key"]
+        if "issues" in response:
+            for issue in response["issues"]:
+                fields = issue["fields"]
+                key = issue["key"]
 
-            list.append(self.build_issue_string(issue))
-            #if "fixVersions" in fields and len(fields["fixVersions"]) > 0:
-            #    list.append("[{0}] {1} {2} - {3}".format(key,fields["summary"],fields["fixVersions"][0]["name"],fields["assignee"]["displayName"]))
-            #else:
-            #    list.append("[{0}] {1} - {2}".format(key,fields["summary"],fields["assignee"]["displayName"]))
+                list.append(self.build_issue_string(issue))
+                #if "fixVersions" in fields and len(fields["fixVersions"]) > 0:
+                #    list.append("[{0}] {1} {2} - {3}".format(key,fields["summary"],fields["fixVersions"][0]["name"],fields["assignee"]["displayName"]))
+                #else:
+                #    list.append("[{0}] {1} - {2}".format(key,fields["summary"],fields["assignee"]["displayName"]))
 
 
-        return list
+            return list
+
+        print("[ERROR] Response from server did not contain any issues, dumping then crashing.\nResponse:\n{}".format(response))
+        exit(1)
         
     def build_issue_string(self,issue):
 

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+
+CONFIG_TYPE="global"
+
+if [ $# -eq 1 ]
+then
+	CONFIG_TYPE=$1
+fi
+
+python3 -m issue_appender -e $CONFIG_TYPE

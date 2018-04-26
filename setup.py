@@ -28,7 +28,9 @@ setup(
 
     long_description=open("README.txt").read(),
 
-    scripts=['bin/git-jira-commit'],
+    scripts=[
+        'bin/git-jira-commit',
+        'bin/git-jira-config'],
 
     # Dependent packages (distributions)
     install_requires=[

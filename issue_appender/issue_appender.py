@@ -324,7 +324,7 @@ class IssueAppender:
     def edit_file(self,path,exit_after_edit=False):
         os.system("$EDITOR {0}".format(path))
         if exit_after_edit:
-            exit()
+            exit(0)
 
     def get_git_root_dir(self):
         path = os.getcwd()
@@ -427,6 +427,9 @@ class IssueAppender:
                 self.edit_file(self.global_config_path,True)
             elif args.edit_conf == "local":
                 self.edit_file(self.local_config_path,True)
+            else:
+                print("[ERROR] Could not find config file for {}, please use global or local".format(args.edit_conf))
+                exit(1)
 
 if __name__ == '__main__':
 
