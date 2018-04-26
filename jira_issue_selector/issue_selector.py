@@ -1,4 +1,4 @@
-from issue_appender.jira_issue import JiraConnector
+from jira_issue_selector.jira_issue import JiraConnector
 
 from fuzzywuzzy import process
 import yaml
@@ -14,7 +14,7 @@ import sys,os,pathlib,shutil
 import git
 
 
-class IssueAppender:
+class IssueSelector:
 
     # Default names for configuration
     CONFIG_DIR_NAME = "jira_issue_appender"
@@ -535,9 +535,3 @@ class IssueAppender:
             else:
                 print("[ERROR] Could not find config file for {}, please use global or local".format(args.edit_conf))
                 exit(1)
-
-if __name__ == '__main__':
-
-
-    ins = IssueAppender()
-    print(ins.selected_issue)

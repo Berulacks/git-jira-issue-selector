@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     # Application name:
-    name="IssueAppender",
+    name="JiraIssueSelector",
 
     # Version number (initial):
     version="0.1.0",
@@ -14,7 +14,7 @@ setup(
     license='GPLv3',
 
     # Packages
-    packages=['issue_appender'],
+    packages=['jira_issue_selector'],
 
     # Include additional files into the package
     include_package_data=True,
