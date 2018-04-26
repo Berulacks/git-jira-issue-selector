@@ -5,7 +5,7 @@ setup(
     name="JiraIssueSelector",
 
     # Version number (initial):
-    version="0.9.0",
+    version="0.9.1",
 
     # Application author details:
     author="<YOUR_NAME_HERE>",
