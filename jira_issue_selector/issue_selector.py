@@ -17,7 +17,7 @@ import git
 class IssueSelector:
 
     # Default names for configuration
-    CONFIG_DIR_NAME = "jira_issue_appender"
+    CONFIG_DIR_NAME = "jira_issue_selector"
     GLOBAL_CONFIG_FILE_NAME = "global.conf"
 
     ISSUES_FOLDER_NAME = "issues"
