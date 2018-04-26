@@ -73,13 +73,17 @@ class IssueAppender:
         for i in range(self.results_to_show() +2):
             print("")
 
+        # Where to start drawing our cursor
+        row, col = term.get_location() 
+        self.start_location = ( row + -1*(self.results_to_show()+3)  , col )
+
         query = ""
 
         self.update_search_query(term,query)
         self.update_results(term,query)
 
         # Move the cursor to the start (after the query text)
-        print(term.move(term.height - self.results_to_show() - 3,len(self.QUERY_TEXT+query))+"",end='',flush=True)
+        print(term.move(self.start_location[0],len(self.QUERY_TEXT+query))+"",end='',flush=True)
 
         while True:
             with term.cbreak():
@@ -101,13 +105,13 @@ class IssueAppender:
                     query = query[:-1]
 
                 # Update the cursory position, query results, and query text
-                print(term.move(term.height - self.results_to_show() - 3,len(self.QUERY_TEXT+query)),end='',flush=True)
+                print(term.move(self.start_location[0],len(self.QUERY_TEXT+query)),end='',flush=True)
                 self.update_search_query(term,query)
                 self.update_results(term,query)
 
     def update_search_query(self,term,query=""):
         # Have to do -3 here since the rows start at 1, and because we're appending a whitespace
-        with term.location(x=0,y=term.height - self.results_to_show() - 3):
+        with term.location(x=0,y=self.start_location[0]):
             print(term.clear_eol() + self.QUERY_TEXT + query, end='')
 
     def update_results(self,term,query=""):
@@ -130,7 +134,7 @@ class IssueAppender:
             
 
         # Print the issues
-        with term.location(x=0,y=term.height - num_issues - 1):
+        with term.location(x=0,y=self.start_location[0]+2):
             for query in issues[:max_index-1]:
                 term.clear_eol()
                 print(term.clear_eol()+query)
