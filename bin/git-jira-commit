@@ -34,7 +34,7 @@ then
 fi
 
 
-$PYTHON_BINARY -m jira_issue_selector -i "$TEMP_FILE"
+$PYTHON_BINARY -m jira_issue_selector -i "$TEMP_FILE" $@
 git commit -t $TEMP_FILE
 
 rm $TEMP_FILE

@@ -30,6 +30,7 @@ setup(
 
     scripts=[
         'bin/git-jira-commit',
+        'bin/git-jira',
         'bin/git-jira-config'],
 
     # Dependent packages (distributions)

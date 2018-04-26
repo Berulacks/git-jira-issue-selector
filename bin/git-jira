@@ -31,11 +31,5 @@ then
 	exit
 fi
 
-CONFIG_TYPE="global"
 
-if [ $# -eq 1 ]
-then
-	CONFIG_TYPE=$1
-fi
-
-$PYTHON_BINARY -m jira_issue_selector -e $CONFIG_TYPE $@
+$PYTHON_BINARY -m jira_issue_selector $@
