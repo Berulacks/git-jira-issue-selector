@@ -22,7 +22,7 @@ Jira:
 
 Main:
     # How many issues to show
-    Max Responses: 4
+    Max Responses: 10
     # Refresh the issue cache every n minutes
     Refresh Interval: 1440
 
