@@ -9,7 +9,7 @@ Jira:
     # https://id.atlassian.com/manage/api-tokens
     Api Key: "<ATLASSIAN_API_KEY>" # REQUIRED
     # Search URL, usually https://<YOUR_SITE>.atlassian.net/rest/api/2/search
-    Search URL: "https://<YOUR_SITE>.atlassian.net/rest/api/2/search"
+    Search URL: "https://<YOUR_SITE>.atlassian.net/rest/api/2/search" # REQUIRED
     # ----- END MANDATORY SECTION -----
 
     # Global result filters
