@@ -214,7 +214,7 @@ class IssueSelector:
 
     def refresh_responses_from_net(self):
             print("Refreshing responses from network...",end="",flush=True)
-            response = self.connector.search_issues(self.project_key,self.assignee_name,self.issue_resolution)
+            response = self.connector.search_issues(self.project_key,self.assignee_name,self.issue_resolution,self.issue_status)
             issues = self.connector.build_issues_array(response)
             return issues
 
@@ -248,6 +248,7 @@ class IssueSelector:
             self.assignee_name = config["Jira"]["Filter"].get("Assignee")
             self.project_key = config["Jira"]["Filter"].get("Project")
             self.issue_resolution = config["Jira"]["Filter"].get("Issue Resolution")
+            self.issue_status = config["Jira"]["Filter"].get("Status")
 
     def write_to_cache(self,path):
 

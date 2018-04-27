@@ -45,12 +45,35 @@ then
 	exit
 fi
 
+# The user wants to make a commit!
+if [ "$1" == "commit" ]
+then
+
+	# Create temporary file to store the issue the user selects
+	TEMP_FILE="$(mktemp)"
+
+	# Actually run the program (also pass all arguments after 'commit'
+	$PYTHON_BINARY -m jira_issue_selector -i "$TEMP_FILE" "${@:2}"
+
+	# Did the program exit correctly? (EXIT_CODE = 0)
+	EXIT_CODE=$?
+	if [ $EXIT_CODE -eq 0 ];then
+		# If so create a new commit with that file
+		git commit -t $TEMP_FILE
+	fi
+
+	# Clean-up afterwards!
+	rm $TEMP_FILE
+	exit
+fi
+
 
 if [ $# -eq 1 ]
 then
 
 	case "$1" in
 
+		# Might put more stuff here, later. Haven't decided.
 		"help")
 			$PYTHON_BINARY -m jira_issue_selector -h
 			echo
@@ -66,25 +89,6 @@ then
 			exit
 			;;
 
-		"commit")
-
-			# Create temporary file to store the issue the user selects
-			TEMP_FILE="$(mktemp)"
-
-			# Actually run the program
-			$PYTHON_BINARY -m jira_issue_selector -i "$TEMP_FILE"
-
-			# Did the program exit correctly? (EXIT_CODE = 0)
-			EXIT_CODE=$?
-			if [ $EXIT_CODE -eq 0 ];then
-				# If so create a new commit with that file
-				git commit -t $TEMP_FILE
-			fi
-
-			# Clean-up afterwards!
-			rm $TEMP_FILE
-			exit
-			;;
 	esac
 
 fi

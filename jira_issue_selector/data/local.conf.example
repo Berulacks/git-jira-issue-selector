@@ -8,7 +8,8 @@ Jira:
         # ...but you can uncomment what you don't need
         #Assignee: <YOUR_NAME>
         Project: <YOUR_PROJECT_KEY> #(such as PNAME or PNAME)
-        Issue Resolution: Unresolved
+        #Issue Resolution: Unresolved
+        #Status: Implement
     
     # A custom JQL query (if necessary; overrides previous fields)
     # JQL: "project = PNAME AND assignee = 'Esteban Panchero'"

@@ -18,6 +18,7 @@ Jira:
         # your name doesn't change often, you can probably drop it here
         #Assignee: <YOUR_NAME>
         #Issue Resolution: Unresolved
+        #Status: Implement
 
 Main:
     # How many issues to show
