@@ -16,6 +16,9 @@ class JiraConnector:
         self.api_key = config["Jira"]["Api Key"]
         self.search_url = config["Jira"]["Search URL"]
 
+        if "JQL" in config["Jira"]:
+                self.custom_jql = config["Jira"]["JQL"]
+
     # Converts a GET Json response dict to a list of searchable strings
     def build_issues_array(self,response):
         list = []
@@ -73,6 +76,9 @@ class JiraConnector:
         headers = {"Accept":"application/json"}
 
         url = self.search_url
+
+        if self.custom_jql is not None:
+            jql = self.custom_jql
 
         payload = { "jql":jql, "fields":fields }
 
