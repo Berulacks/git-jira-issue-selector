@@ -16,6 +16,9 @@ import git
 
 class IssueSelector:
 
+    EXIT_CODE_CONFIG = 78
+    EXIT_CODE_CANCEL = 75
+
     # Default names for configuration
     CONFIG_DIR_NAME = "jira_issue_selector"
     GLOBAL_CONFIG_FILE_NAME = "global.conf"
@@ -104,7 +107,7 @@ class IssueSelector:
                     return self.sorted_issues[self.selected_issue]
 
                 if key == "KEY_ESCAPE":
-                    return None
+                    exit(self.EXIT_CODE_CANCEL)
 
                 if key == "KEY_DELETE":
                     query = query[:-1]
@@ -345,7 +348,7 @@ class IssueSelector:
                 
                 print("Config generated. Please try again. Remember, you can always call `issue_appender -e global` to edit the global config")
                 blessed.Terminal().inkey()
-                exit(0)
+                exit(self.EXIT_CODE_CONFIG)
 
         # Load Local config (copying pasting the same code so that I can print the unique message)
         local_conf = self.load_config(local_config_path)
@@ -361,7 +364,7 @@ class IssueSelector:
 
                 print("Config generated. Please try again. Remember, you can always call `issue_appender -e local` to edit the local config")
                 blessed.Terminal().inkey()
-                exit(0)
+                exit(self.EXIT_CODE_CONFIG)
 
         final_conf = global_conf 
         
@@ -421,7 +424,7 @@ class IssueSelector:
     def edit_file(self,path,exit_after_edit=False):
         os.system("$EDITOR {0}".format(path))
         if exit_after_edit:
-            exit(0)
+            exit(self.EXIT_CODE_CONFIG)
 
     def get_git_root_dir(self):
         path = os.getcwd()
@@ -533,4 +536,4 @@ class IssueSelector:
                 self.edit_file(self.local_config_path,True)
             else:
                 print("[ERROR] Could not find config file for {}, please use global or local".format(args.edit_conf))
-                exit(1)
+                exit(self.EXIT_CODE_CONFIG)

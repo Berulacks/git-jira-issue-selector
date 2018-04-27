@@ -35,6 +35,10 @@ fi
 
 
 $PYTHON_BINARY -m jira_issue_selector -i "$TEMP_FILE" $@
-git commit -t $TEMP_FILE
+
+EXIT_CODE=$?
+if [ $EXIT_CODE -eq 0 ];then
+	git commit -t $TEMP_FILE
+fi
 
 rm $TEMP_FILE
