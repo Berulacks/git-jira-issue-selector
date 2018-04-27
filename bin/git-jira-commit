@@ -1,7 +1,5 @@
 #!/bin/bash
 
-TEMP_FILE="$(mktemp)"
-
 function check_py_version
 {
 	# Full version number e.g. 2.7.1
@@ -33,6 +31,7 @@ then
 	exit
 fi
 
+TEMP_FILE="$(mktemp)"
 
 $PYTHON_BINARY -m jira_issue_selector -i "$TEMP_FILE" $@
 

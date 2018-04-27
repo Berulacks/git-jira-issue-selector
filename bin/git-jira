@@ -31,5 +31,42 @@ then
 	exit
 fi
 
+# Is the user passing the config flag instead of directly invoking the python binary?
+if [ "$1" == "config" ]
+then
+	if [ -z "$2" ]
+	then
+		# Default to global
+		$PYTHON_BINARY -m jira_issue_selector -e "global"
+	else
+		# Or whatever the user passed
+		$PYTHON_BINARY -m jira_issue_selector -e "$2"
+	fi
+	exit
+fi
 
+# Is the user looking to make a commit in stead of the usual config flag?
+if [ "$1" == "commit" ]
+then
+	# Create temporary file to store the issue the user selects
+	TEMP_FILE="$(mktemp)"
+
+	# Actually run the program
+	$PYTHON_BINARY -m jira_issue_selector -i "$TEMP_FILE"
+
+	# Did the program exit correctly? (EXIT_CODE = 0)
+	EXIT_CODE=$?
+	if [ $EXIT_CODE -eq 0 ];then
+		# If so create a new commit with that file
+		git commit -t $TEMP_FILE
+	fi
+
+	# Clean-up afterwards!
+	rm $TEMP_FILE
+	exit
+fi
+
+# If we made it here it means the user just wants to forward their
+# args to the python script (and, well, execute it)
+# What? It's easier than typing "python -m jira_issue_selector"
 $PYTHON_BINARY -m jira_issue_selector $@
