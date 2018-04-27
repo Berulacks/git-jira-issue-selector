@@ -2,7 +2,7 @@
 
 Jira:
     # ----- THESE ARE MANDATORY -----
-	# Your Atlassian ID e-mail
+    # Your Atlassian ID e-mail
     Username: "<USER_EMAIL>" # REQUIRED
     # Your Atlassian API Key. 
     # If you don't yet have one, generate it here: 

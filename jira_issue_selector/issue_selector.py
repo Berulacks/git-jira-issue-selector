@@ -339,32 +339,32 @@ class IssueSelector:
             self.init_config_system(global_config_path)
             self.add_title_to_file(global_config_path, "# -- Global Configuration File --\n")
 
-            # If we're in Edit mode then we're already here to edit the files! Lets not quit, yet
+            # Ask the user to configure the program
+            print("First time setup complete, configuration required. Press any key to continue.")
+            blessed.Terminal().inkey()
+            self.edit_file(global_config_path,False)
+            
             if not self.edit_mode:
-                # Ask the user to configure the program
-                print("First time setup complete, configuration required. Press any key to continue.")
+                print("Config generated. Please try again. Remember, you can always call `git-jira-config global` to edit the global config")
                 blessed.Terminal().inkey()
-                self.edit_file(global_config_path,False)
-                
-                print("Config generated. Please try again. Remember, you can always call `issue_appender -e global` to edit the global config")
-                blessed.Terminal().inkey()
-                exit(self.EXIT_CODE_CONFIG)
+            exit(self.EXIT_CODE_CONFIG)
 
         # Load Local config (copying pasting the same code so that I can print the unique message)
         local_conf = self.load_config(local_config_path)
         if local_conf is None:
             print("First time local setup complete, configuration required. Press any key to continue.")
-            #print("Copying from {1} to {0}".format(local_config_path,self.script_dir()+"/data/{}.example".format(self.LOCAL_CONFIGS_PREFIX)))
+
             self.init_config_system(local_config_path,self.script_dir()+"/data/{}.example".format(self.LOCAL_CONFIGS_PREFIX))
             self.add_title_to_file(local_config_path, "# -- Local Configuration file for Project: {0}, Branch: {1} --\n".format(git_root,git_branch))
 
-            if not self.edit_mode:
-                blessed.Terminal().inkey()
-                self.edit_file(local_config_path,False)
+            #if not self.edit_mode:
+            blessed.Terminal().inkey()
+            self.edit_file(local_config_path,False)
 
-                print("Config generated. Please try again. Remember, you can always call `issue_appender -e local` to edit the local config")
+            if not self.edit_mode:
+                print("Config generated. Please try again. Remember, you can always call `git-jira-config local` to edit the local config")
                 blessed.Terminal().inkey()
-                exit(self.EXIT_CODE_CONFIG)
+            exit(self.EXIT_CODE_CONFIG)
 
         final_conf = global_conf 
         
