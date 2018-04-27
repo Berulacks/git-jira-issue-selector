@@ -45,25 +45,48 @@ then
 	exit
 fi
 
-# Is the user looking to make a commit in stead of the usual config flag?
-if [ "$1" == "commit" ]
+
+if [ $# -eq 1 ]
 then
-	# Create temporary file to store the issue the user selects
-	TEMP_FILE="$(mktemp)"
 
-	# Actually run the program
-	$PYTHON_BINARY -m jira_issue_selector -i "$TEMP_FILE"
+	case "$1" in
 
-	# Did the program exit correctly? (EXIT_CODE = 0)
-	EXIT_CODE=$?
-	if [ $EXIT_CODE -eq 0 ];then
-		# If so create a new commit with that file
-		git commit -t $TEMP_FILE
-	fi
+		"help")
+			$PYTHON_BINARY -m jira_issue_selector -h
+			echo
+			echo "You may also use the 'git jira' wrapper script."
+			echo "It simply wraps the python script, and adds some functionality:"
+			echo
+			echo "usage: git jira [config global|local] [help] [commit]"
+			echo
+			echo "optional arguments: "
+			echo "  [commit] Run the issue-selector, then pass the selected issue to 'git commit'"
+			echo "  [config] same as the -e flag above"
+			echo "  [help] same as the -h flag above"
+			exit
+			;;
 
-	# Clean-up afterwards!
-	rm $TEMP_FILE
-	exit
+		"commit")
+
+			# Create temporary file to store the issue the user selects
+			TEMP_FILE="$(mktemp)"
+
+			# Actually run the program
+			$PYTHON_BINARY -m jira_issue_selector -i "$TEMP_FILE"
+
+			# Did the program exit correctly? (EXIT_CODE = 0)
+			EXIT_CODE=$?
+			if [ $EXIT_CODE -eq 0 ];then
+				# If so create a new commit with that file
+				git commit -t $TEMP_FILE
+			fi
+
+			# Clean-up afterwards!
+			rm $TEMP_FILE
+			exit
+			;;
+	esac
+
 fi
 
 # If we made it here it means the user just wants to forward their
