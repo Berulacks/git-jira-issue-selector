@@ -36,9 +36,8 @@ setup(
     long_description=readme(),
 
     scripts=[
-        'bin/git-jira-commit',
-        'bin/git-jira',
-        'bin/git-jira-config'],
+        'bin/git-jira'
+        ],
 
     # Dependent packages (distributions)
     install_requires=[
