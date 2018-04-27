@@ -12,7 +12,7 @@ Jira:
         #Status: Implement
     
     # A custom JQL query (if necessary; overrides previous fields)
-    # JQL: "project = PNAME AND assignee = 'Esteban Panchero'"
+    # JQL: "project = PNAME AND assignee = '<YOUR_NAME_HERE>' AND status != 'Ready to Test'"
     # ----- END DROIDS -----
 
 Main:
