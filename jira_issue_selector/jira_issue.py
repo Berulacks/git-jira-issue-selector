@@ -16,6 +16,7 @@ class JiraConnector:
         self.api_key = config["Jira"]["Api Key"]
         self.search_url = config["Jira"]["Search URL"]
 
+        self.custom_jql = None
         if "JQL" in config["Jira"]:
                 self.custom_jql = config["Jira"]["JQL"]
 
