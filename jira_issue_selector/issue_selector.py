@@ -345,7 +345,7 @@ class IssueSelector:
             self.edit_file(global_config_path,False)
             
             if not self.edit_mode:
-                print("Config generated. Please try again. Remember, you can always call `git-jira-config global` to edit the global config")
+                print("Config generated. Please try again. Remember, you can always call `git jira-config global` to edit the global config")
                 blessed.Terminal().inkey()
             exit(self.EXIT_CODE_CONFIG)
 
@@ -362,7 +362,7 @@ class IssueSelector:
             self.edit_file(local_config_path,False)
 
             if not self.edit_mode:
-                print("Config generated. Please try again. Remember, you can always call `git-jira-config local` to edit the local config")
+                print("Config generated. Please try again. Remember, you can always call `git jira-config local` to edit the local config")
                 blessed.Terminal().inkey()
             exit(self.EXIT_CODE_CONFIG)
 
