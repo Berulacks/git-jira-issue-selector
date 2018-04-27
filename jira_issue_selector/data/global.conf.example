@@ -2,18 +2,15 @@
 
 Jira:
     # ----- THESE ARE MANDATORY -----
-    # JIRA API Key
-
-    Username: "<USER_EMAIL>"
+	# Your Atlassian ID e-mail
+    Username: "<USER_EMAIL>" # REQUIRED
     # Your Atlassian API Key. 
     # If you don't yet have one, generate it here: 
     # https://id.atlassian.com/manage/api-tokens
-    Api Key: "<ATLASSIAN_API_KEY>"
+    Api Key: "<ATLASSIAN_API_KEY>" # REQUIRED
     # Search URL, usually https://<YOUR_SITE>.atlassian.net/rest/api/2/search
-    Search URL: "<SEARCH_URL>"
+    Search URL: "https://<YOUR_SITE>.atlassian.net/rest/api/2/search"
     # ----- END MANDATORY SECTION -----
-
-
 
     # Global result filters
     Filter:
