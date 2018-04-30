@@ -5,6 +5,8 @@
 
 Just run: `pip3 install <python package or path to git directory of repo>`
 
+*NB: This program requires Python 3.0 or later.*
+
 ## Configuration:
 
 The Issue Selector needs to be configured globally, once; and then again one
@@ -18,7 +20,7 @@ time for every project.
 If these files are not found by default, the program will automatically
 generate them and prompt you to edit them. This only happens on first-run. **The _Global_ configuration is applied every time the program is run, whereas the _Local_ configuration is specific to the git repo and branch you're currently in.**
 
-The program stores all configuration and cache files in `$HOME/.config/issue-selector`. Cache files are updated every time the user invokes the script with the `-u` flag, updates a configuration file, or the time specified in the `Refresh Interval` field from a configuration file has passed since the program was last run.
+The program stores all configuration and cache files in `$HOME/.config/jira_issue_selector`. Cache files are updated every time the user invokes the script with the `-u` flag, updates a configuration file, or the time specified in the `Refresh Interval` field from a configuration file has passed since the program was last run.
 
 _NB:_ Configuration files are loaded in the following order: `Global -> Local -> Additional config specified by the user`
 
