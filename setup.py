@@ -27,7 +27,8 @@ setup(
     include_package_data=True,
 
     # Details
-    url="http://http://github.com/berulacks",
+    url="http://http://github.com/berulacks/git-jira-issue-selector",
+    download_url="https://github.com/Berulacks/git-jira-issue-selector/releases/download/v1.0.2/JiraIssueSelector-1.0.2.tar.gz",
 
     #
     # license="LICENSE.txt",
