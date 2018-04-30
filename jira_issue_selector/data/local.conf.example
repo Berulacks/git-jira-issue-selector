@@ -23,5 +23,5 @@ Main:
     #Refresh Interval: 1440
 
     # Uncomment this if you want a hardcoded cache location
-    # (default is inside the same directory as the script)
+    # (default is inside $HOME/.config/jira_issue_selector)
     #Cache File: ./.issue_cache
