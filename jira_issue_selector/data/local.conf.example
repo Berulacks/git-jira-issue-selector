@@ -7,13 +7,13 @@ Jira:
         # You probably want to fill these out,
         # ...but you can uncomment what you don't need
         #Assignee: <YOUR_NAME>
-        Project: <YOUR_PROJECT_KEY> #(such as PNAME or PNAME)
+        Project: <YOUR_PROJECT_KEY> #(such as TWT or TEN)
         #Issue Resolution: Unresolved
         #Status: Implement
     
     # A custom JQL query (if necessary; overrides previous fields)
     # Use this if the 4 fields above are not enough for your needs.
-    #JQL: "project = PNAME AND assignee = '<YOUR_NAME_HERE>' AND status != 'Ready to Test'"
+    #JQL: "project = Your Project Here AND assignee = 'Your Name Here' AND status != 'Ready to Test'"
     # ----- END DROIDS -----
 
 Main:

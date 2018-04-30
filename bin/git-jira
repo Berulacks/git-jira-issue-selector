@@ -10,10 +10,10 @@ function check_py_version
 }
 
 PYTHON_BINARY=""
-POPNAMETIAL_BINARIES=( "python" "python3" "python3.6" "python3.5" )
+POTENTIAL_BINARIES=( "python" "python3" "python3.6" "python3.5" )
 PY3_SUPPORT=false
 
-for i in "${POPNAMETIAL_BINARIES[@]}"
+for i in "${POTENTIAL_BINARIES[@]}"
 do
 	PYTHON_BINARY="$i"
 	#echo "Checking for $PYTHON_BINARY"

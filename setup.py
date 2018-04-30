@@ -11,7 +11,7 @@ setup(
     version="0.9.5.1",
 
     # Application author details:
-    author="<YOUR_NAME_HERE>",
+    author="Derin Yarsuvat",
     author_email="derin@ml1.net",
 
     license='GPLv3',
