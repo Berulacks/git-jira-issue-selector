@@ -1,4 +1,6 @@
 include jira_issue_selector
 include README.md
+include LICENSE.txt
+include requirements.txt
 include bin
 recursive-include jira_issue_selector/data *
