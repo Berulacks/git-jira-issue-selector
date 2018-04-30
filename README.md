@@ -22,15 +22,18 @@ For further questions reach me on slack @derin or through email: derin@ml1.net
 
 ### Git Wrapper
 
+```
 usage: git jira [config global|local] [help] [commit]
 
 optional arguments: 
   [commit] Run the issue-selector, then pass the selected issue to 'git commit'
   [config] same as the -e flag below
   [help] same as the -h flag below
+```
 
 ### Original Python Function
 
+```
 usage: python -m jira_issue_selector [-h] [-n num_results_to_show] [-c path_to_config_file] [-u]
                                      [-e] [-d] [-nc] [-i issue_file_to_write_to]
 
@@ -60,3 +63,4 @@ optional arguments:
                         otherwise) (default: False)
   -nc, --no-cache       Disables reading and writing to the cache (default:
                         False)
+```
