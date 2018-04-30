@@ -5,6 +5,8 @@
 
 Just run: `pip3 install <python package or path to git directory of repo>`
 
+*NB: This program requires Python 3.0 or later.*
+
 ## Configuration:
 
 The Issue Selector needs to be configured globally, once; and then again one
