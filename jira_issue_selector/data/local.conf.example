@@ -13,7 +13,7 @@ Jira:
     
     # A custom JQL query (if necessary; overrides previous fields)
     # Use this if the 4 fields above are not enough for your needs.
-    #JQL: "project = Your Project Here AND assignee = 'Your Name Here' AND status != 'Ready to Test'"
+    #JQL: "project = PNAME AND assignee = '<YOUR_NAME>' AND status != 'Ready to Test'"
     # ----- END DROIDS -----
 
 Main:
