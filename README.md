@@ -3,7 +3,7 @@
 
 ## Install: 
 
-Just run: `pip3 install <python package or path to git directory of repo>`
+Just run: `pip3 install JiraIssueSelector` (or download and use one of the releases from [the GitHub repo](https://github.com/Berulacks/git-jira-issue-selector))
 
 *NB: This program requires Python 3.0 or later.*
 
