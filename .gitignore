@@ -13,3 +13,4 @@ venv
 /*.egg-info
 
 MANIFEST
+.DS_store
