@@ -2,21 +2,24 @@
 
 ## Install: 
 
-Just run: pip3 install <the file>
+Just run: `pip3 install <python package or path to git directory of repo>`
 
 ## Configuration:
 
 The Issue Selector needs to be configured globally, once; and then again one
 time for every project.
 
-To configure it globally type: git jira config
-To configure it locally type (while in a git repository): 
-git jira config local
+To configure it globally type: `git jira config`
+
+To configure it locally type (while in a git repository): `git jira config local`
+
 
 If these files are not found by default, the program will automatically
 generate them and prompt you to edit them. This only happens on first-run.
 
-For further questions reach me on slack @derin or through email: derin@ml1.net
+The program stores all configuration and cache files in `$HOME/.config/issue-selector`. Cache files are updated every time the user invokes the script with the `-u` flag, updates a configuration file, or the time specified in the `Refresh Interval` field from a configuration file changes.
+
+_NB:_ Configuration files are loaded in the following order: `Global -> Local -> Additional config specified by the user`
 
 ## Usage: 
 
@@ -52,7 +55,7 @@ optional arguments:
                         The number of results to show on screen (default: 5)
   -c path_to_config_file, --config-path path_to_config_file
                         The relative path to the configuration file. (default:
-                        /Users/derin/.config/jira_issue_appender/jira.conf)
+                        $HOME/.config/jira_issue_appender/jira.conf)
   -u, --update-cache    Update the issue cache. This happens automatically
                         according to the config (usually), but can be manually
                         controlled from here. (default: False)
