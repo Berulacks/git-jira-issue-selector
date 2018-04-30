@@ -1,10 +1,10 @@
 # Jira Issue Selector
 
-##Install: 
+## Install: 
 
 Just run: pip3 install <the file>
 
-##Configuration:
+## Configuration:
 
 The Issue Selector needs to be configured globally, once; and then again one
 time for every project.
@@ -18,7 +18,7 @@ generate them and prompt you to edit them. This only happens on first-run.
 
 For further questions reach me on slack @derin or through email: derin@ml1.net
 
-##Usage: 
+## Usage: 
 
 ### Git Wrapper
 
