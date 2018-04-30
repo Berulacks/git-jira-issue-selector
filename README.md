@@ -9,7 +9,7 @@ Just run: `pip3 install <python package or path to git directory of repo>`
 The Issue Selector needs to be configured globally, once; and then again one
 time for every project.
 
-To configure it globally type: `git jira config`
+To configure it globally type: `git jira config global`
 
 To configure it locally type (while in a git repository): `git jira config local`
 
