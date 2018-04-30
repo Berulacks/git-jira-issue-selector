@@ -1,4 +1,5 @@
 # Jira Issue Selector
+*A little utility for automatically selecting and prepending JIRA Issue keys to git commit messages.*
 
 ## Install: 
 
