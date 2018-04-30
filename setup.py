@@ -35,6 +35,7 @@ setup(
     description="Allows you to quickly select and prepend JIRA issues to git commit messages",
 
     long_description=readme(),
+    long_description_content_type='text/markdown',
 
     scripts=[
         'bin/git-jira'
