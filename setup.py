@@ -57,6 +57,7 @@ setup(
         'urllib3==1.22',
         'wcwidth==0.1.7'
     ],
+    python_requires='>=3',
     zip_safe=False
 )
 
