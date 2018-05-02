@@ -16,6 +16,9 @@ import git
 
 class IssueSelector:
 
+    # We're going to pass this when we leave, unless someone changes it
+    normal_exit_code = 0
+
     EXIT_CODE_CONFIG = 78
     EXIT_CODE_CANCEL = 75
     EXIT_CODE_WITH_MESSAGE = 60
@@ -57,6 +60,7 @@ class IssueSelector:
 
         term = blessed.Terminal()
         print(term.clear_eos()+"")
+        exit(self.normal_exit_code)
 
     def save_issue(self,issue_to_save):
 
@@ -71,6 +75,9 @@ class IssueSelector:
                 issue_file.write("{} ".format(issue_key))
             else:
                 issue_file.write("{0} {1}".format(issue_key,self.append_message))
+                # We have to do this so the git-jira script knows to use the -m
+                # `git commit` format
+                self.normal_exit_code = self.EXIT_CODE_WITH_MESSAGE
 
     def select_issue(self):
         #I FEEL BLESSED
