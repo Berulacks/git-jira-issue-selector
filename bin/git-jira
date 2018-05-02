@@ -60,10 +60,12 @@ then
 	EXIT_CODE=$?
 	if [ $EXIT_CODE -eq 0 ];then
 		# If so create a new commit with that file
+		echo "N MODE"
 		git commit -t $TEMP_FILE
 	elif [ $EXIT_CODE -eq $MESSAGE_EXIT_CODE ];
 	then
-		git commit -m "$(echo $TEMP_FILE)"
+		echo "M MODE"
+		git commit -m "$(cat $TEMP_FILE)"
 	fi
 
 	# Clean-up afterwards!
