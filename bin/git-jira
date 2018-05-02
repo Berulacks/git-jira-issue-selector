@@ -9,6 +9,7 @@ function check_py_version
 	! [ "$(echo $python_version | head -c 1 )" -lt "3" ]
 }
 
+MESSAGE_EXIT_CODE=60
 PYTHON_BINARY=""
 POTENTIAL_BINARIES=( "python" "python3" "python3.6" "python3.5" )
 PY3_SUPPORT=false
@@ -60,6 +61,9 @@ then
 	if [ $EXIT_CODE -eq 0 ];then
 		# If so create a new commit with that file
 		git commit -t $TEMP_FILE
+	elif [ $EXIT_CODE -eq $MESSAGE_EXIT_CODE ];
+	then
+		git commit -m "$(echo $TEMP_FILE)"
 	fi
 
 	# Clean-up afterwards!

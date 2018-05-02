@@ -18,6 +18,7 @@ class IssueSelector:
 
     EXIT_CODE_CONFIG = 78
     EXIT_CODE_CANCEL = 75
+    EXIT_CODE_WITH_MESSAGE = 60
 
     # Default names for configuration
     CONFIG_DIR_NAME = "jira_issue_selector"
@@ -66,7 +67,10 @@ class IssueSelector:
         issue_key = issue_to_save.split(" ")[0]
 
         with open(file_path,"w+") as issue_file:
-            issue_file.write("{} ".format(issue_key))
+            if self.append_message is None:
+                issue_file.write("{} ".format(issue_key))
+            else:
+                issue_file.write("{0} {1}".format(issue_key,self.append_message))
 
     def select_issue(self):
         #I FEEL BLESSED
@@ -496,6 +500,7 @@ class IssueSelector:
         parser.add_argument('-e', '--edit-conf', type=str, default="", help='Edit a configuration file. Valid options are global or local. The $EDITOR shell variable must be set for this', metavar='[global|local]')
         parser.add_argument('-d', '--dry-run', action='store_true', help='Does not save anything to the disk (cache or otherwise)')
         parser.add_argument('-nc', '--no-cache', action='store_true', help='Disables reading and writing to the cache')
+        parser.add_argument('-m', '--commit-message',type=str,help='A message to automatically append to the key. (think `git commit -m`)')
 
 
         parser.add_argument('-i', '--issue-file', default="", type=str, help='The issue selected by the user will be written to this file, if passed. Use this to actually receive the output of the program. I recommend using mktemp to generate this file path.', metavar='issue_file_to_write_to')
@@ -538,3 +543,8 @@ class IssueSelector:
             else:
                 print("[ERROR] Could not find config file for {}, please use global or local".format(args.edit_conf))
                 exit(self.EXIT_CODE_CONFIG)
+
+        # Optional message to append
+        self.append_message = None
+        if args.commit_message is not None:
+            self.append_message = args.commit_message
