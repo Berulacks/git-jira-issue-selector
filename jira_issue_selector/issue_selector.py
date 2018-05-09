@@ -19,8 +19,13 @@ class IssueSelector:
     # We're going to pass this when we leave, unless someone changes it
     normal_exit_code = 0
 
+    # We're exiting because the user edited their config
     EXIT_CODE_CONFIG = 78
+    # We're exiting because the user canceled!
     EXIT_CODE_CANCEL = 75
+    # We're exiting normally, but the user wants
+    # to use `git commit -m` (a.k.a. no interactive commit
+    # message prompt)
     EXIT_CODE_WITH_MESSAGE = 60
 
     # Default names for configuration
@@ -225,6 +230,11 @@ class IssueSelector:
 
     def refresh_responses_from_net(self):
             print("Refreshing responses from network...",end="",flush=True)
+
+            if not getattr(self,"project_key",False):
+                print("\n[ERROR] Cannot fetch issues without a project key. Please add a 'Project' field to your Jira configuration.")
+                exit(self.EXIT_CODE_CANCEL)
+
             response = self.connector.search_issues(self.project_key,self.assignee_name,self.issue_resolution,self.issue_status)
             issues = self.connector.build_issues_array(response)
             return issues
@@ -235,7 +245,11 @@ class IssueSelector:
             issues = self.refresh_responses_from_net()
             #print(issues)
         else:
-            issues = self.read_from_cache(self.cache_file_path)
+            issues = None
+
+            if self.cache_file_path is not None:
+                issues = self.read_from_cache(self.cache_file_path)
+
             if issues == None or self.is_cache_expired() or self.is_config_different():
                 issues = self.refresh_responses_from_net()
                 # Shitty to do this here, but write to cache does need it
@@ -330,15 +344,15 @@ class IssueSelector:
         
 
     def configure(self):
-        git_root = self.get_git_root_dir()
-        git_branch = self.get_git_branch()
 
         global_config_path = self.config_dir().joinpath(self.GLOBAL_CONFIG_FILE_NAME)
-        local_config_path = self.config_dir().joinpath( "{2}/{0}.{1}.{3}".format(git_root, git_branch,self.LOCAL_CONFIGS_FOLDER_NAME,self.LOCAL_CONFIGS_PREFIX) )
 
         # In case another function needs these
         self.global_config_path = global_config_path
-        self.local_config_path = local_config_path
+
+        # Set these up as empty, for now
+        self.local_config_path = None
+        self.cache_file_path = None
 
         final_conf = {}
 
@@ -362,29 +376,42 @@ class IssueSelector:
                 blessed.Terminal().inkey()
             exit(self.EXIT_CODE_CONFIG)
 
-        # Load Local config (copying pasting the same code so that I can print the unique message)
-        local_conf = self.load_config(local_config_path)
-        if local_conf is None:
-            print("First time local setup complete, configuration required. Press any key to continue.")
-
-            self.init_config_system(local_config_path,self.script_dir()+"/data/{}.example".format(self.LOCAL_CONFIGS_PREFIX))
-            self.add_title_to_file(local_config_path, "# -- Local Configuration file for Project: {0}, Branch: {1} --\n".format(git_root,git_branch))
-
-            #if not self.edit_mode:
-            blessed.Terminal().inkey()
-            self.edit_file(local_config_path,False)
-
-            if not self.edit_mode:
-                print("Config generated. Please try again. Remember, you can always call `git jira-config local` to edit the local config")
-                blessed.Terminal().inkey()
-            exit(self.EXIT_CODE_CONFIG)
-
+        # Our final configuration (will merge local onto it in a bit)
         final_conf = global_conf 
+
+        try:
+            git_root = self.get_git_root_dir()
+            git_branch = self.get_git_branch()
+            local_config_path = self.config_dir().joinpath( "{2}/{0}.{1}.{3}".format(git_root, git_branch,self.LOCAL_CONFIGS_FOLDER_NAME,self.LOCAL_CONFIGS_PREFIX) )
+
+            self.local_config_path = local_config_path
+            self.cache_file_path = self.config_dir().joinpath( "{2}/{0}.{1}.cache".format(git_root, git_branch,self.ISSUES_FOLDER_NAME) )
+
+            # Load Local config (copying pasting the same code so that I can print the unique message)
+            local_conf = self.load_config(local_config_path)
+            if local_conf is None:
+                print("First time local setup complete, configuration required. Press any key to continue.")
+
+                self.init_config_system(local_config_path,self.script_dir()+"/data/{}.example".format(self.LOCAL_CONFIGS_PREFIX))
+                self.add_title_to_file(local_config_path, "# -- Local Configuration file for Project: {0}, Branch: {1} --\n".format(git_root,git_branch))
+
+                #if not self.edit_mode:
+                blessed.Terminal().inkey()
+                self.edit_file(local_config_path,False)
+
+                if not self.edit_mode:
+                    print("Config generated. Please try again. Remember, you can always call `git jira-config local` to edit the local config")
+                    blessed.Terminal().inkey()
+                exit(self.EXIT_CODE_CONFIG)
         
-        # Load the local conf onto the global
-        #print("global conf before local added: {}".format(global_conf))
-        final_conf = self.dict_merge(final_conf,local_conf)
-        #print ("final conf after merge: {}".format(final_conf))
+            # Load the local conf onto the global
+            #print("global conf before local added: {}".format(global_conf))
+            final_conf = self.dict_merge(final_conf,local_conf)
+            #print ("final conf after merge: {}".format(final_conf))
+        except git.exc.InvalidGitRepositoryError:
+            # If we have no git repo, we have no local config, which means no local cache
+            self.no_cache = True
+            print("No GIT repo detected, running without local configuration.")
 
         self.config = final_conf
 
@@ -521,9 +548,8 @@ class IssueSelector:
         if args.extra_config_path is not None:
             extra_config_path = args.extra_config_path
 
-        self.cache_file_path = self.config_dir().joinpath( "{2}/{0}.{1}.cache".format(self.get_git_root_dir(), self.get_git_branch(),self.ISSUES_FOLDER_NAME) )
-
         self.issue_file = args.issue_file
+        self.no_cache = args.no_cache
 
         #Load the configuration system
         if extra_config_path is not None:
@@ -541,7 +567,6 @@ class IssueSelector:
 
         if args.num_results is not None:
             self.NUM_RESULTS = args.num_results
-        self.no_cache = args.no_cache
 
         if self.edit_mode:
             if args.edit_conf == "global":
