@@ -15,6 +15,7 @@ class JiraConnector:
         self.user_name = config["Jira"]["Username"]
         self.api_key = config["Jira"]["Api Key"]
         self.search_url = config["Jira"]["Search URL"]
+        self.max_issues_to_get = config["Jira"]["Max Search Results"]
 
         self.custom_jql = None
         if "JQL" in config["Jira"]:
@@ -81,7 +82,11 @@ class JiraConnector:
         if self.custom_jql is not None:
             jql = self.custom_jql
 
-        payload = { "jql":jql, "fields":fields }
+        num_issues_to_get = 50
+        if self.max_issues_to_get is not None:
+            num_issues_to_get = self.max_issues_to_get
+
+        payload = { "jql":jql, "fields":fields, "maxResults":num_issues_to_get }
 
         return self.make_request(url, headers, payload)
 

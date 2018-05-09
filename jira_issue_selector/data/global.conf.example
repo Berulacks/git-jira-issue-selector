@@ -12,6 +12,9 @@ Jira:
     Search URL: "https://<YOUR_SITE>.atlassian.net/rest/api/2/search" # REQUIRED
     # ----- END MANDATORY SECTION -----
 
+    # Important: How many issues to FETCH (from the server)
+    Max Search Results: 100
+
     # Global result filters
     Filter:
         # Global filters don't always make sense, but seeing as how
@@ -21,7 +24,7 @@ Jira:
         #Status: Implement
 
 Main:
-    # How many issues to show
+    # How many issues to SHOW (does not affect incoming data from server)
     Max Responses: 10
     # Refresh the issue cache every n minutes
     Refresh Interval: 1440
