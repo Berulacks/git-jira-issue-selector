@@ -341,7 +341,27 @@ class IssueSelector:
                 sources.writelines(lines[1:])
             else:
                 sources.writelines(lines)
+
+    def interactive_config_bootstrap(self,path,config_title,source_config="",edit_message="",post_message=""):
+        # Initialize the config system (copy any example configs to their final directories)
+        self.init_config_system(path,source_config)
+        # Strip the original title and replace it with the one we're being fed
+        self.add_title_to_file(path, config_title)
+
+        # Ask the user to configure the program
+        if len(edit_message > 0):
+            print(edit_message)
+            # Wait for them to press a key
+            blessed.Terminal().inkey()
+
+        # Drop them into editing
+        self.edit_file(path,False)
         
+        if len(post_message) > 0:
+            print(post_message)
+            blessed.Terminal().inkey()
+
+        exit(self.EXIT_CODE_CONFIG)
 
     def configure(self):
 
@@ -359,26 +379,13 @@ class IssueSelector:
         # Load Global config
         global_conf = self.load_config(global_config_path)
         if global_conf is None:
-            # uh oh, no config could be found
-
-            # If this is the default config that isn't there, lets create it
-            #self.init_sys()
-            self.init_config_system(global_config_path)
-            self.add_title_to_file(global_config_path, "# -- Global Configuration File --\n")
-
-            # Ask the user to configure the program
-            print("First time setup complete, configuration required. Press any key to continue.")
-            blessed.Terminal().inkey()
-            self.edit_file(global_config_path,False)
-            
-            if not self.edit_mode:
-                print("Config generated. Please try again. Remember, you can always call `git jira-config global` to edit the global config")
-                blessed.Terminal().inkey()
-            exit(self.EXIT_CODE_CONFIG)
-
-        # Our final configuration (will merge local onto it in a bit)
+            title = "# -- Global Configuration File --\n"
+            pre = "First time setup complete, configuration required. Press any key to continue."
+            post = "Config generated. Please try again. Remember, you can always call `git jira-config global` to edit the global config" if not self.edit_mode else ""
+            self.interactive_config_bootstrap(global_config_path,"",title,pre,post)
         final_conf = global_conf 
 
+        # Load Local config
         try:
             git_root = self.get_git_root_dir()
             git_branch = self.get_git_branch()
@@ -387,22 +394,13 @@ class IssueSelector:
             self.local_config_path = local_config_path
             self.cache_file_path = self.config_dir().joinpath( "{2}/{0}.{1}.cache".format(git_root, git_branch,self.ISSUES_FOLDER_NAME) )
 
-            # Load Local config (copying pasting the same code so that I can print the unique message)
             local_conf = self.load_config(local_config_path)
             if local_conf is None:
-                print("First time local setup complete, configuration required. Press any key to continue.")
-
-                self.init_config_system(local_config_path,self.script_dir()+"/data/{}.example".format(self.LOCAL_CONFIGS_PREFIX))
-                self.add_title_to_file(local_config_path, "# -- Local Configuration file for Project: {0}, Branch: {1} --\n".format(git_root,git_branch))
-
-                #if not self.edit_mode:
-                blessed.Terminal().inkey()
-                self.edit_file(local_config_path,False)
-
-                if not self.edit_mode:
-                    print("Config generated. Please try again. Remember, you can always call `git jira-config local` to edit the local config")
-                    blessed.Terminal().inkey()
-                exit(self.EXIT_CODE_CONFIG)
+                title = "# -- Local Configuration file for Project: {0}, Branch: {1} --\n".format(git_root,git_branch)
+                pre = "First time local setup complete, configuration required. Press any key to continue."
+                post = "Config generated. Please try again. Remember, you can always call `git jira config local` to edit the local config" if not self.edit_mode else ""
+                source = self.script_dir()+"/data/{}.example".format(self.LOCAL_CONFIGS_PREFIX)
+                self.interactive_config_bootstrap(local_config_path,title,source,pre,post)
         
             # Load the local conf onto the global
             #print("global conf before local added: {}".format(global_conf))
@@ -411,7 +409,7 @@ class IssueSelector:
         except git.exc.InvalidGitRepositoryError:
             # If we have no git repo, we have no local config, which means no local cache
             self.no_cache = True
-            print("No GIT repo detected, running without local configuration.")
+            print("[WARNING] No GIT repo detected, running without local configuration.")
 
         self.config = final_conf
 
