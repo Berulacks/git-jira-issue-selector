@@ -255,7 +255,8 @@ class IssueSelector:
             if "Refresh Interval" in config["Main"]:
                 self.refresh_interval = config["Main"]["Refresh Interval"]
 
-        if "Filter" in config["Jira"]:
+        # Have to add the "is not None" check just in case the Filter area is there, but empty
+        if "Filter" in config["Jira"] and config["Jira"]["Filter"] is not None:
             self.assignee_name = config["Jira"]["Filter"].get("Assignee")
             self.project_key = config["Jira"]["Filter"].get("Project")
             self.issue_resolution = config["Jira"]["Filter"].get("Issue Resolution")
