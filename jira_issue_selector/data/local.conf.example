@@ -7,7 +7,7 @@ Jira:
         # You probably want to fill these out,
         # ...but you can uncomment what you don't need
         #Assignee: <YOUR_NAME>
-        Project: <YOUR_PROJECT_KEY> #(such as TWT or TEN)
+        Project: <YOUR_PROJECT_KEY> # REQUIRED
         #Issue Resolution: Unresolved
         #Status: Implement
     
