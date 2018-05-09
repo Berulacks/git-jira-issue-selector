@@ -15,7 +15,10 @@ class JiraConnector:
         self.user_name = config["Jira"]["Username"]
         self.api_key = config["Jira"]["Api Key"]
         self.search_url = config["Jira"]["Search URL"]
-        self.max_issues_to_get = config["Jira"]["Max Search Results"]
+
+        self.max_issues_to_get = None
+        if "Max Search Results" in config["Jira"]:
+            self.max_issues_to_get = config["Jira"]["Max Search Results"]
 
         self.custom_jql = None
         if "JQL" in config["Jira"]:
