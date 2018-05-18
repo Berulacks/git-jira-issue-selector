@@ -349,7 +349,7 @@ class IssueSelector:
         self.add_title_to_file(path, config_title)
 
         # Ask the user to configure the program
-        if len(edit_message > 0):
+        if len(edit_message) > 0:
             print(edit_message)
             # Wait for them to press a key
             blessed.Terminal().inkey()
