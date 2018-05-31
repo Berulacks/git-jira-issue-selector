@@ -29,7 +29,7 @@ _NB:_ Configuration files are loaded in the following order: `Global -> Local ->
 ### Git Wrapper
 
 ```
-usage: git jira [config global|local|local] [help] [commit]
+usage: git jira [config global|local|copy] [help] [commit]
 
 optional arguments:
   [commit] Run the issue-selector, then pass the selected issue to 'git commit'
