@@ -18,7 +18,7 @@ setup(
     license='GPLv3',
 
     # Packages
-    packages=['jira_issue_selector'],
+    packages=['jira_issue_selector', 'jira_issue_selector.ui'],
 
     package_data={
         'jira_issue_selector': ['data/*']

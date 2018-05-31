@@ -1,4 +1,5 @@
 include jira_issue_selector
+include jira_issue_selector/ui
 include README.md
 include LICENSE.txt
 include requirements.txt
