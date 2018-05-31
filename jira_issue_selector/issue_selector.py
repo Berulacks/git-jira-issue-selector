@@ -123,6 +123,7 @@ class IssueSelector:
                     return self.sorted_issues[self.selected_issue]
 
                 if key == "KEY_ESCAPE":
+                    print(term.clear_eos()+"")
                     exit(self.EXIT_CODE_CANCEL)
 
                 if key == "KEY_DELETE":
@@ -361,6 +362,7 @@ class IssueSelector:
             print(post_message)
             blessed.Terminal().inkey()
 
+        print(term.clear_eos()+"")
         exit(self.EXIT_CODE_CONFIG)
 
     def configure(self):
