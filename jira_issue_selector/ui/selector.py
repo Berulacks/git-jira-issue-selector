@@ -1,16 +1,5 @@
 from fuzzywuzzy import process
-import yaml
 import blessed
-import operator
-import argparse, code
-import time
-import collections
-
-import sys,os,pathlib,shutil
-
-# For saving cache info on a per-repo basis
-import git
-
 
 class Selector:
 

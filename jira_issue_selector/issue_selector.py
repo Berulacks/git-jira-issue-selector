@@ -43,9 +43,6 @@ class IssueSelector:
     # By default refresh the issues every n minutes
     refresh_interval = 1440
 
-    # The currently selected issue
-    selected_issue = 0
-
     def __init__(self):
 
         # Parse command line arguments
@@ -57,7 +54,7 @@ class IssueSelector:
         self.issues = self.get_responses()
         self.sorted_issues = self.issues.copy()
 
-        result_tuple = Selector().select_item(self.sorted_issues,15,self.QUERY_TEXT)
+        result_tuple = Selector().select_item(self.sorted_issues,self.NUM_RESULTS,self.QUERY_TEXT)
 
         term = blessed.Terminal()
         # User cancelled the select
@@ -93,127 +90,6 @@ class IssueSelector:
                 # We have to do this so the git-jira script knows to use the -m
                 # `git commit` format
                 self.normal_exit_code = self.EXIT_CODE_WITH_MESSAGE
-
-    def select_issue(self):
-        #I FEEL BLESSED
-        term = blessed.Terminal()
-
-        #start_row, start_col = term.get_location()
-        #print("Row: {0}, Col: {0}".format(start_row,start_col))
-
-        # Space out the terminal (important)
-        for i in range(self.results_to_show() +2):
-            print("")
-
-        # Where to start drawing our cursor
-        row, col = term.get_location() 
-        self.start_location = ( row + -1*(self.results_to_show()+3)  , col )
-
-        query = ""
-
-        self.update_search_query(term,query)
-        self.update_results(term,query)
-
-        # Move the cursor to the start (after the query text)
-        print(term.move(self.start_location[0],len(self.QUERY_TEXT+query))+"",end='',flush=True)
-
-        while True:
-            with term.cbreak():
-                key = term.inkey()
-                if key.is_sequence:
-                    # Are we a special like KEY_UP?
-                    key = key.name
-                else:
-                    # ...or just a normal letter?
-                    query += key
-                    # Lets reset our selected issue, too
-                    self.selected_issue = 0
-
-                if key == "KEY_ENTER":
-                    return self.sorted_issues[self.selected_issue]
-
-                if key == "KEY_ESCAPE":
-                    print(term.clear_eos()+"")
-                    exit(self.EXIT_CODE_CANCEL)
-
-                if key == "KEY_DELETE":
-                    query = query[:-1]
-
-                # Move up/down the list?
-                if key == "KEY_UP":
-                    self.update_selected_issue(True)
-                if key == "KEY_DOWN":
-                    self.update_selected_issue(False)
-
-                # Update the cursory position, query results, and query text
-                print(term.move(self.start_location[0],len(self.QUERY_TEXT+query)),end='',flush=True)
-                self.update_search_query(term,query)
-                self.update_results(term,query)
-
-    def update_selected_issue(self,direction_up):
-
-        increment_by = -1 if direction_up else 1
-
-        self.selected_issue += increment_by
-        #print(self.selected_issue)
-        #blessed.Terminal().inkey()
-
-        if self.selected_issue >= self.results_to_show():
-            self.selected_issue = 0
-        elif self.selected_issue < 0:
-            self.selected_issue = self.results_to_show() - 1
-
-    def update_search_query(self,term,query=""):
-        # Have to do -3 here since the rows start at 1, and because we're appending a whitespace
-        with term.location(x=0,y=self.start_location[0]):
-            print(term.clear_eol() + self.QUERY_TEXT + query, end='')
-
-    def update_results(self,term,query=""):
-
-        issues = self.issues
-        num_issues = self.results_to_show()
-
-        max_index = -1 if num_issues > len(issues) else num_issues
-
-        if len(query) > 0:
-            # Perform the sort
-            scored_results = process.extract(query,issues,limit=len(issues) )
-            #print(scored_results)
-            #term.inkey()
-
-            # Sort the results!
-            scored_results = sorted(scored_results, key=operator.itemgetter(1), reverse=True)
-            # Copy the first part of the tuple into issues (scored_results is in [(value,score),(...)] form
-            issues = [ result[0] for result in scored_results ]
-            
-
-        selected = self.selected_issue
-        issue_number = 0
-
-        # Print the issues
-        with term.location(x=0,y=self.start_location[0]+2):
-            for query in issues[:max_index-1]:
-                term.clear_eol()
-                # Print the selected issue as colorized
-                if issue_number == selected:
-                    print( term.black_on_white(term.clear_eol()+query), end='',flush=True )
-                    # Clear the remaining background color after the line is finished printing
-                    print( term.clear_eol() + '')
-                else:
-                    print(term.clear_eol()+query)
-
-                issue_number += 1
-
-            # Print the LAST item of the list without the trailing newline, important to preserve our UI
-            term.clear_eol()
-            if issue_number == selected:
-                print(term.black_on_white(term.clear_eol+issues[max_index-1]), end='')
-                print( term.clear_eol() + '', end='')
-            else:
-                print(term.clear_eol+issues[max_index-1], end='')
-
-        # Update the global sorted list
-        self.sorted_issues = issues.copy()
 
     # TODO: Compare config timestamps to determine if a refresh is needed
     def is_config_different(self):
@@ -443,9 +319,6 @@ class IssueSelector:
                 shutil.copyfile(self.script_dir()+"/data/{}.example".format(path.name),path)
             else:
                 shutil.copyfile(example_config,path)
-
-    def results_to_show(self):
-        return min(self.NUM_RESULTS, len(self.issues))
 
     def script_dir(self):
         return os.path.dirname(os.path.realpath(__file__))
