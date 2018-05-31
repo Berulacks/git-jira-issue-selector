@@ -1,4 +1,5 @@
 from jira_issue_selector.jira_issue import JiraConnector
+from jira_issue_selector.ui.selector import Selector
 
 from fuzzywuzzy import process
 import yaml
@@ -56,14 +57,23 @@ class IssueSelector:
         self.issues = self.get_responses()
         self.sorted_issues = self.issues.copy()
 
-        selected_issue = self.select_issue()
+        result_tuple = Selector().select_item(self.sorted_issues,15,self.QUERY_TEXT)
+
+        term = blessed.Terminal()
+        # User cancelled the select
+        if result_tuple is None:
+            print(term.clear_eos()+"")
+            exit(self.EXIT_CODE_CANCEL)
+
+        selected_issue = result_tuple[0]
+        self.sorted_issues = result_tuple[1]
+
 
         if selected_issue is not None:
             self.save_issue(selected_issue)
             self.write_to_cache(self.cache_file_path)
             self.selected_issue = selected_issue
 
-        term = blessed.Terminal()
         print(term.clear_eos()+"")
         exit(self.normal_exit_code)
 
