@@ -460,7 +460,13 @@ class IssueSelector:
 
     
     def edit_file(self,path,exit_after_edit=False):
-        os.system("$EDITOR {0}".format(path))
+        editor=os.environ["EDITOR"]
+
+        if editor == "":
+            editor = "vi"
+
+        os.system("{0} {1}".format(editor,path))
+
         if exit_after_edit:
             exit(self.EXIT_CODE_CONFIG)
 
