@@ -40,8 +40,15 @@ then
 		# Default to global
 		$PYTHON_BINARY -m jira_issue_selector -e "global"
 	else
-		# Or whatever the user passed
-		$PYTHON_BINARY -m jira_issue_selector -e "$2"
+		if [ "$2" == "copy" ]
+		then
+			# special check: does the user want to copy an old config?
+			$PYTHON_BINARY -m jira_issue_selector --copy-config
+
+		else
+			# Or whatever the user passed
+			$PYTHON_BINARY -m jira_issue_selector -e "$2"
+		fi
 	fi
 	exit
 fi
@@ -86,11 +93,11 @@ then
 			echo "You may also use the 'git jira' wrapper script."
 			echo "It simply wraps the python script, and adds some functionality:"
 			echo
-			echo "usage: git jira [config global|local] [help] [commit]"
+			echo "usage: git jira [config global|local|local] [help] [commit]"
 			echo
 			echo "optional arguments: "
 			echo "  [commit] Run the issue-selector, then pass the selected issue to 'git commit'"
-			echo "  [config] same as the -e flag above"
+			echo "  [config] same as the -e flag above. Note: Pass 'copy' to initiate the interactive config copying dialogue"
 			echo "  [help] same as the -h flag above"
 			exit
 			;;

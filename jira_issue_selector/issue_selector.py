@@ -2,6 +2,7 @@ from jira_issue_selector.jira_issue import JiraConnector
 from jira_issue_selector.ui.selector import Selector
 
 from fuzzywuzzy import process
+from pathlib import Path
 import yaml
 import blessed
 import operator
@@ -9,7 +10,7 @@ import argparse, code
 import time
 import collections
 
-import sys,os,pathlib,shutil
+import sys,os,shutil
 
 # For saving cache info on a per-repo basis
 import git
@@ -172,8 +173,8 @@ class IssueSelector:
         current_global_ts = self.current_global_config_ts()
         
         # In case we don't have the requisite folder structure for our cache
-        if not os.path.exists( pathlib.Path( path ).parent ):
-            os.makedirs( pathlib.Path(path).parent )
+        if not os.path.exists( Path( path ).parent ):
+            os.makedirs( Path(path).parent )
 
         with open(path,"w+") as cache_file :
             # CACHE TIMESTAMP
@@ -248,12 +249,12 @@ class IssueSelector:
             print(post_message)
             blessed.Terminal().inkey()
 
-        print(term.clear_eos()+"")
+        print(blessed.Terminal().clear_eos()+"")
         exit(self.EXIT_CODE_CONFIG)
 
     def configure(self,extra_config_path=None):
 
-        global_config_path = self.config_dir().joinpath(self.GLOBAL_CONFIG_FILE_NAME)
+        global_config_path = self.global_config_path()
 
         # In case another function needs these
         self.global_config_path = global_config_path
@@ -275,15 +276,18 @@ class IssueSelector:
 
         # Load Local config
         try:
+
             git_root = self.get_git_root_dir()
             git_branch = self.get_git_branch()
-            local_config_path = self.config_dir().joinpath( "{2}/{0}.{1}.{3}".format(git_root, git_branch,self.LOCAL_CONFIGS_FOLDER_NAME,self.LOCAL_CONFIGS_PREFIX) )
 
+            local_config_path = self.local_configuration_path(git_root,git_branch)
             self.local_config_path = local_config_path
+
             self.cache_file_path = self.config_dir().joinpath( "{2}/{0}.{1}.cache".format(git_root, git_branch,self.ISSUES_FOLDER_NAME) )
 
             local_conf = self.load_config(local_config_path)
             if local_conf is None:
+
                 title = "# -- Local Configuration file for Project: {0}, Branch: {1} --\n".format(git_root,git_branch)
                 pre = "First time local setup complete, configuration required. Press any key to continue."
                 post = "Config generated. Please try again. Remember, you can always call `git jira config local` to edit the local config" if not self.edit_mode else ""
@@ -328,7 +332,7 @@ class IssueSelector:
         return os.path.dirname(os.path.realpath(__file__))
 
     def local_configs_dir(self):
-        return pathlib.Path.home().joinpath(".config/{0}/{1}".format(self.CONFIG_DIR_NAME,self.LOCAL_CONFIGS_FOLDER_NAME))
+        return Path.home().joinpath(".config/{0}/{1}".format(self.CONFIG_DIR_NAME,self.LOCAL_CONFIGS_FOLDER_NAME))
 
     def current_local_config_ts(self):
         local_config_path = self.local_config_path
@@ -341,11 +345,21 @@ class IssueSelector:
         return os.path.getmtime(global_config_path)
 
 
+    def local_configuration_path(self,git_root=None,git_branch=None):
+
+        if git_root is None:
+            git_root = self.get_git_root_dir()
+        if git_branch is None:
+            git_branch = self.get_git_branch()
+
+        local_config_path = self.config_dir().joinpath( "{2}/{0}.{1}.{3}".format(git_root, git_branch,self.LOCAL_CONFIGS_FOLDER_NAME,self.LOCAL_CONFIGS_PREFIX) )
+        return local_config_path
+
     def global_config_path(self):
-        return pathlib.Path.home().joinpath(".config/{0}/{1}".format(self.CONFIG_DIR_NAME,self.GLOBAL_CONFIG_FILE_NAME))
+        return Path.home().joinpath(".config/{0}/{1}".format(self.CONFIG_DIR_NAME,self.GLOBAL_CONFIG_FILE_NAME))
 
     def config_dir(self):
-        return pathlib.Path.home().joinpath(".config/{0}".format(self.CONFIG_DIR_NAME))
+        return Path.home().joinpath(".config/{0}".format(self.CONFIG_DIR_NAME))
 
     
     def edit_file(self,path,exit_after_edit=False):
@@ -417,11 +431,12 @@ class IssueSelector:
 
     def parse_args(self):
 
-        home = pathlib.Path.home()
+        home = Path.home()
 
         parser = argparse.ArgumentParser(description="A JIRA issue selector for git messages",formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         parser.add_argument('-n', '--num-results', type=int, default=None, help='The number of results to show on screen', metavar='num_results_to_show')
         parser.add_argument('-c', '--extra-config-path', help='An extra config file to load.', metavar='path_to_config_file')
+        parser.add_argument('-cc', '--copy-config', action='store_true', help='Allows you to interactively select a pre-existing config for the current local config. E.g. use this if you want to copy the same config from another branch. This overwrites the current config')
 
         parser.add_argument('-u', '--update-cache', action='store_true', help='Update the issue cache. This happens automatically according to the config (usually), but can be manually controlled from here.')
 
@@ -434,6 +449,13 @@ class IssueSelector:
         parser.add_argument('-i', '--issue-file', default="", type=str, help='The issue selected by the user will be written to this file, if passed. Use this to actually receive the output of the program. I recommend using mktemp to generate this file path.', metavar='issue_file_to_write_to')
 
         args = parser.parse_args()
+
+        self.dry_run = args.dry_run
+        if args.dry_run:
+            print("[DRY RUN]")
+
+        if args.copy_config:
+            self.start_config_copy()
 
         self.edit_mode = len(args.edit_conf) > 1
 
@@ -454,10 +476,6 @@ class IssueSelector:
         #DEBUG
         #self.update_on_start = True
 
-        self.dry_run = args.dry_run
-        if args.dry_run:
-            print("[DRY RUN]")
-
         if args.num_results is not None:
             self.NUM_RESULTS = args.num_results
 
@@ -474,3 +492,60 @@ class IssueSelector:
         self.append_message = None
         if args.commit_message is not None:
             self.append_message = args.commit_message
+
+    def get_directory_contents(self,directory_path):
+        """ Recursively returns the contents of a given directory (all Path objects)
+        :type directory_path: Path
+        :param directory_path: The Path object representing the directory to recurse into."""
+
+        contents = []
+
+        for content in directory_path.iterdir():
+            # if it's a directory, recurse
+            if content.is_dir():
+                subdir_contents = self.get_directory_contents(content)
+                contents.extend(subdir_contents)
+            else:
+                # if it's a file add its full representation
+                contents.append(directory_path.joinpath(content))
+
+        return contents
+
+
+    def start_config_copy(self):
+
+        print("Starting interactive copy dialogue for local configuration...")
+
+        try: 
+            git_root = self.get_git_root_dir()
+            git_branch = self.get_git_branch()
+
+            current_local_config_path = self.local_configuration_path(git_root,git_branch)
+        except git.exc.InvalidGitRepositoryError:
+            # If we have no git repo, we have no local config, which means what the hell are we doing in this function
+            print("[WARNING] No GIT repo detected, can't edit local configurations.")
+            exit(1)
+
+        local_configs_root = self.local_configs_dir()
+        paths = [ path for path in self.get_directory_contents(local_configs_root) if path != current_local_config_path ]
+        items = [ path.relative_to(local_configs_root) for path in paths ] 
+
+        selected_item_tuple = Selector.select_item(items,15,"Search for local config: ")
+
+        if selected_item_tuple is not None:
+
+            selected_item = selected_item_tuple[0]
+
+            print("Replace current local config for {1}{2} with config from: {0}? (y/n) ".format(selected_item,git_root,git_branch),end="",flush=True)
+            term = blessed.Terminal()
+            key=term.inkey()
+
+            if key == "y":
+                match = [path for path in paths if path.match(str(selected_item))]
+                selected_path=match[0]
+
+                print("Replacing {0} with {1}...".format(current_local_config_path, selected_path))
+                if not self.dry_run:
+                    shutil.copyfile(selected_path,current_local_config_path)
+            
+        exit( self.normal_exit_code )

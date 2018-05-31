@@ -6,6 +6,18 @@ class Selector:
 
     @classmethod
     def select_item(selector,items,num_results=15,title="Query: "):
+        """Prompt the user to interactively select an item from a pre-given list of items.
+        :param items: The full list of items the user may select from
+        :param num_results: The amount of items to show on screen/search for
+        :param title: (Optional) The title of the query text input field. Defaults to 'Query:'
+
+        :type items: list
+        :type num_results: int
+        :type title: string
+
+        :rtype: string
+        :return: The selected item, or None if the user canceled
+        """
         #I FEEL BLESSED
         term = blessed.Terminal()
 
@@ -102,21 +114,21 @@ class Selector:
                 term.clear_eol()
                 # Print the selected result as colorized
                 if result_number == selected:
-                    print( term.black_on_white(term.clear_eol()+result), end='',flush=True )
+                    print( term.black_on_white(term.clear_eol()+str(result)), end='',flush=True )
                     # Clear the remaining background color after the line is finished printing
                     print( term.clear_eol() + '')
                 else:
-                    print(term.clear_eol()+result)
+                    print(term.clear_eol()+str(result))
 
                 result_number += 1
 
             # Print the LAST item of the list without the trailing newline, important to preserve our UI
             term.clear_eol()
             if result_number == selected:
-                print(term.black_on_white(term.clear_eol+results[max_index-1]), end='')
+                print(term.black_on_white(term.clear_eol+str(results[max_index-1])), end='')
                 print( term.clear_eol() + '', end='')
             else:
-                print(term.clear_eol+results[max_index-1], end='')
+                print(term.clear_eol+str(results[max_index-1]), end='')
 
         # Update the global sorted list
         return results.copy()
