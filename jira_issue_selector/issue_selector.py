@@ -251,7 +251,7 @@ class IssueSelector:
         print(term.clear_eos()+"")
         exit(self.EXIT_CODE_CONFIG)
 
-    def configure(self):
+    def configure(self,extra_config_path=None):
 
         global_config_path = self.config_dir().joinpath(self.GLOBAL_CONFIG_FILE_NAME)
 
@@ -298,6 +298,10 @@ class IssueSelector:
             # If we have no git repo, we have no local config, which means no local cache
             self.no_cache = True
             print("[WARNING] No GIT repo detected, running without local configuration.")
+
+        if extra_config_path is not None:
+            extra_conf = self.load_config(extra_config_path)
+            final_conf = self.dict_merge(final_conf,extra_conf)
 
         self.config = final_conf
 
