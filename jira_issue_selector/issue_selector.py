@@ -54,7 +54,7 @@ class IssueSelector:
         self.issues = self.get_responses()
         self.sorted_issues = self.issues.copy()
 
-        result_tuple = Selector().select_item(self.sorted_issues,self.NUM_RESULTS,self.QUERY_TEXT)
+        result_tuple = Selector.select_item(self.sorted_issues,self.NUM_RESULTS,self.QUERY_TEXT)
 
         term = blessed.Terminal()
         # User cancelled the select

@@ -1,16 +1,11 @@
 from fuzzywuzzy import process
 import blessed
+import operator
 
 class Selector:
 
-    # The currently selected result
-    selected_result = 0
-
-    def __init__(self):
-        pass
-
-
-    def select_item(self,items,num_results=15,title="Select: "):
+    @classmethod
+    def select_item(selector,items,num_results=15,title="Query: "):
         #I FEEL BLESSED
         term = blessed.Terminal()
 
@@ -25,15 +20,16 @@ class Selector:
 
         # Where to start drawing our cursor
         row, col = term.get_location() 
-        self.start_location = ( row + -1*(num_results+3)  , col )
+        start_location = ( row + -1*(num_results+3)  , col )
 
         query = ""
+        selected_result = 0
 
-        self.update_search_query(term,title,query)
-        sorted_results = self.update_results(term,items,num_results,query)
+        selector.update_search_query(term,start_location,title,query)
+        sorted_results = selector.update_results(term,start_location,items,num_results,query,selected_result)
 
         # Move the cursor to the start (after the query text)
-        print(term.move(self.start_location[0],len(title+query))+"",end='',flush=True)
+        print(term.move(start_location[0],len(title+query))+"",end='',flush=True)
 
         while True:
             with term.cbreak():
@@ -45,11 +41,11 @@ class Selector:
                     # ...or just a normal letter?
                     query += key
                     # Lets reset our selected result, too
-                    self.selected_result = 0
+                    selected_result = 0
 
                 if key == "KEY_ENTER":
                     print(term.clear_eos()+"")
-                    return (sorted_results[self.selected_result],sorted_results)
+                    return (sorted_results[selected_result],sorted_results)
 
                 if key == "KEY_ESCAPE":
                     print(term.clear_eos()+"")
@@ -60,34 +56,26 @@ class Selector:
 
                 # Move up/down the list?
                 if key == "KEY_UP":
-                    self.update_selected_result(True,num_results)
+                    selected_result = selector.clamp(selected_result - 1, 0, len(items))
                 if key == "KEY_DOWN":
-                    self.update_selected_result(False,num_results)
+                    selected_result = selector.clamp(selected_result + 1, 0, len(items))
 
                 # Update the cursory position, query results, and query text
-                print(term.move(self.start_location[0],len(title+query)),end='',flush=True)
-                self.update_search_query(term,title,query)
-                sorted_results = self.update_results(term,sorted_results,num_results,query)
+                print(term.move(start_location[0],len(title+query)),end='',flush=True)
+                selector.update_search_query(term,start_location,title,query)
+                sorted_results = selector.update_results(term,start_location,items,num_results,query,selected_result)
 
-    def update_selected_result(self,direction_up,max_results):
+    @staticmethod
+    def clamp(n, smallest, largest): return max(smallest, min(n, largest))
 
-        increment_by = -1 if direction_up else 1
-
-        self.selected_result += increment_by
-        #print(self.selected_result)
-        #blessed.Terminal().inkey()
-
-        if self.selected_result >= max_results:
-            self.selected_result = 0
-        elif self.selected_result < 0:
-            self.selected_result = max_results - 1
-
-    def update_search_query(self,term,title,query=""):
+    @staticmethod
+    def update_search_query(term,start_location,title,query=""):
         # Have to do -3 here since the rows start at 1, and because we're appending a whitespace
-        with term.location(x=0,y=self.start_location[0]):
+        with term.location(x=0,y=start_location[0]):
             print(term.clear_eol() + title + query, end='')
 
-    def update_results(self,term,results,num_results,query=""):
+    @staticmethod
+    def update_results(term,start_location,results,num_results,query="",selected_result=-1):
 
         num_results = min(len(results),num_results)
 
@@ -105,11 +93,11 @@ class Selector:
             results = [ result[0] for result in scored_results ]
             
 
-        selected = self.selected_result
+        selected = selected_result
         result_number = 0
 
         # Print the results
-        with term.location(x=0,y=self.start_location[0]+2):
+        with term.location(x=0,y=start_location[0]+2):
             for result in results[:max_index-1]:
                 term.clear_eol()
                 # Print the selected result as colorized
@@ -132,7 +120,3 @@ class Selector:
 
         # Update the global sorted list
         return results.copy()
-
-
-    def results_to_show(self):
-        return min(self.NUM_RESULTS, len(self.results))
