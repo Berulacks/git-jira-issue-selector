@@ -93,7 +93,7 @@ then
 			echo "You may also use the 'git jira' wrapper script."
 			echo "It simply wraps the python script, and adds some functionality:"
 			echo
-			echo "usage: git jira [config global|local|local] [help] [commit]"
+			echo "usage: git jira [config global|local|copy] [help] [commit]"
 			echo
 			echo "optional arguments: "
 			echo "  [commit] Run the issue-selector, then pass the selected issue to 'git commit'"
