@@ -29,44 +29,51 @@ _NB:_ Configuration files are loaded in the following order: `Global -> Local ->
 ### Git Wrapper
 
 ```
-usage: git jira [config global|local] [help] [commit]
+usage: git jira [config global|local|local] [help] [commit]
 
-optional arguments: 
+optional arguments:
   [commit] Run the issue-selector, then pass the selected issue to 'git commit'
-  [config] same as the -e flag below
+  [config] same as the -e flag below. Note: Pass 'copy' to initiate the interactive config copying dialogue
   [help] same as the -h flag below
 ```
 
 ### Original Python Function
 
 ```
-usage: python -m jira_issue_selector [-h] [-n num_results_to_show] [-c path_to_config_file] [-u]
-                                     [-e] [-d] [-nc] [-i issue_file_to_write_to]
+usage: __main__.py [-h] [-n num_results_to_show] [-c path_to_config_file]
+                   [-cc] [-u] [-e [global|local]] [-d] [-nc]
+                   [-m COMMIT_MESSAGE] [-i issue_file_to_write_to]
 
 A JIRA issue selector for git messages
-
-positional arguments:
-  issue_file_to_write_to
-                        The selected issue will be written to this file, if
-                        passed. Use this to actually receive the output of the
-                        program. I recommend using mktemp to generate this
-                        file path.
 
 optional arguments:
   -h, --help            show this help message and exit
   -n num_results_to_show, --num-results num_results_to_show
-                        The number of results to show on screen (default: 5)
-  -c path_to_config_file, --config-path path_to_config_file
-                        The relative path to the configuration file. (default:
-                        $HOME/.config/jira_issue_appender/jira.conf)
+                        The number of results to show on screen (default:
+                        None)
+  -c path_to_config_file, --extra-config-path path_to_config_file
+                        An extra config file to load. (default: None)
+  -cc, --copy-config    Allows you to interactively select a pre-existing
+                        config for the current local config. E.g. use this if
+                        you want to copy the same config from another branch.
+                        This overwrites the current config (default: False)
   -u, --update-cache    Update the issue cache. This happens automatically
                         according to the config (usually), but can be manually
                         controlled from here. (default: False)
-  -e, --edit-conf       Drops the user into an editor to edit their
-                        configuration file. The $EDITOR shell variable must be
-                        set for this (default: False)
+  -e [global|local], --edit-conf [global|local]
+                        Edit a configuration file. Valid options are global or
+                        local. The $EDITOR shell variable must be set for this
+                        (default: )
   -d, --dry-run         Does not save anything to the disk (cache or
                         otherwise) (default: False)
   -nc, --no-cache       Disables reading and writing to the cache (default:
                         False)
+  -m COMMIT_MESSAGE, --commit-message COMMIT_MESSAGE
+                        A message to automatically append to the key. (think
+                        `git commit -m`) (default: None)
+  -i issue_file_to_write_to, --issue-file issue_file_to_write_to
+                        The issue selected by the user will be written to this
+                        file, if passed. Use this to actually receive the
+                        output of the program. I recommend using mktemp to
+                        generate this file path. (default: )
 ```
