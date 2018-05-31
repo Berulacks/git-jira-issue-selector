@@ -9,7 +9,7 @@ setup(
     name="JiraIssueSelector",
 
     # Version number (initial):
-    version="1.0.7",
+    version="1.0.8",
 
     # Application author details:
     author="Derin Yarsuvat",
@@ -29,7 +29,7 @@ setup(
 
     # Details
     url="https://github.com/berulacks/git-jira-issue-selector",
-    download_url="https://github.com/Berulacks/git-jira-issue-selector/releases/download/v1.0.7/JiraIssueSelector-1.0.7-py3-none-any.whl",
+    download_url="https://github.com/Berulacks/git-jira-issue-selector/releases/download/v1.0.8/JiraIssueSelector-1.0.8-py3-none-any.whl",
 
     #
     # license="LICENSE.txt",
