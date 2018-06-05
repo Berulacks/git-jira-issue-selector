@@ -15,6 +15,9 @@ Jira:
     # Use this if the 4 fields above are not enough for your needs.
     #JQL: "project = PNAME AND assignee = '<YOUR_NAME>' AND status != 'Ready to Test'"
     # ----- END DROIDS -----
+    #
+    # NB: You may also uncomment the following line if you want to filter by a specific board
+    #Search URL: "https://<YOUR_SITE>.atlassian.net/rest/agile/1.0/board/<BOARD_NUMBER>/issue"
 
 Main:
     # How many issues to show
