@@ -144,7 +144,7 @@ class IssueSelector:
                 self.sorted_issues = issues
                 # Hey, our cache exists at this point, might as well keep it up to date
                 self.write_to_cache(self.cache_file_path)
-            
+
         return issues
 
     def apply_config(self,config):
@@ -171,7 +171,7 @@ class IssueSelector:
 
         current_local_ts = self.current_local_config_ts()
         current_global_ts = self.current_global_config_ts()
-        
+
         # In case we don't have the requisite folder structure for our cache
         if not os.path.exists( Path( path ).parent ):
             os.makedirs( Path(path).parent )
@@ -207,7 +207,7 @@ class IssueSelector:
                 issues = [ line.strip() for line in issues ]
 
                 return issues
-        
+
         # If we're here something went wrong reading from the cache
         return None
 
@@ -244,7 +244,7 @@ class IssueSelector:
 
         # Drop them into editing
         self.edit_file(path,False)
-        
+
         if len(post_message) > 0:
             print(post_message)
             blessed.Terminal().inkey()
@@ -272,7 +272,7 @@ class IssueSelector:
             pre = "First time setup complete, configuration required. Press any key to continue."
             post = "Config generated. Please try again. Remember, you can always call `git jira-config global` to edit the global config" if not self.edit_mode else ""
             self.interactive_config_bootstrap(global_config_path,"",title,pre,post)
-        final_conf = global_conf 
+        final_conf = global_conf
 
         # Load Local config
         try:
@@ -293,7 +293,7 @@ class IssueSelector:
                 post = "Config generated. Please try again. Remember, you can always call `git jira config local` to edit the local config" if not self.edit_mode else ""
                 source = self.script_dir()+"/data/{}.example".format(self.LOCAL_CONFIGS_PREFIX)
                 self.interactive_config_bootstrap(local_config_path,title,source,pre,post)
-        
+
             # Load the local conf onto the global
             #print("global conf before local added: {}".format(global_conf))
             final_conf = self.dict_merge(final_conf,local_conf)
@@ -361,7 +361,7 @@ class IssueSelector:
     def config_dir(self):
         return Path.home().joinpath(".config/{0}".format(self.CONFIG_DIR_NAME))
 
-    
+
     def edit_file(self,path,exit_after_edit=False):
         editor=os.environ["EDITOR"]
 
@@ -375,7 +375,7 @@ class IssueSelector:
 
     def get_git_root_dir(self):
         path = os.getcwd()
-        
+
         git_repo = git.Repo(path, search_parent_directories=True)
         git_root = git_repo.git.rev_parse("--show-toplevel")
 
@@ -384,7 +384,7 @@ class IssueSelector:
 
     def get_git_branch(self):
         path = os.getcwd()
-        
+
         git_repo = git.Repo(path, search_parent_directories=True)
 
         # Get branches
@@ -433,7 +433,7 @@ class IssueSelector:
 
         home = Path.home()
 
-        parser = argparse.ArgumentParser(description="A JIRA issue selector for git messages",formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser = argparse.ArgumentParser(prog="git-jira", description="A JIRA issue selector for git messages",formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         parser.add_argument('-n', '--num-results', type=int, default=None, help='The number of results to show on screen', metavar='num_results_to_show')
         parser.add_argument('-c', '--extra-config-path', help='An extra config file to load.', metavar='path_to_config_file')
         parser.add_argument('-cc', '--copy-config', action='store_true', help='Allows you to interactively select a pre-existing config for the current local config. E.g. use this if you want to copy the same config from another branch. This overwrites the current config')
@@ -516,7 +516,7 @@ class IssueSelector:
 
         print("Starting interactive copy dialogue for local configuration...")
 
-        try: 
+        try:
             git_root = self.get_git_root_dir()
             git_branch = self.get_git_branch()
 
@@ -528,7 +528,7 @@ class IssueSelector:
 
         local_configs_root = self.local_configs_dir()
         paths = [ path for path in self.get_directory_contents(local_configs_root) if path != current_local_config_path ]
-        items = [ path.relative_to(local_configs_root) for path in paths ] 
+        items = [ path.relative_to(local_configs_root) for path in paths ]
 
         selected_item_tuple = Selector.select_item(items,15,"Search for local config: ")
 
@@ -547,5 +547,5 @@ class IssueSelector:
                 print("Replacing {0} with {1}...".format(current_local_config_path, selected_path))
                 if not self.dry_run:
                     shutil.copyfile(selected_path,current_local_config_path)
-            
+
         exit( self.normal_exit_code )
