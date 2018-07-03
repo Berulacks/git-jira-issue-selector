@@ -9,7 +9,7 @@ setup(
     name="JiraIssueSelector",
 
     # Version number (initial):
-    version="1.0.9",
+    version="1.0.9.1",
 
     # Application author details:
     author="Derin Yarsuvat",
@@ -29,7 +29,7 @@ setup(
 
     # Details
     url="https://github.com/berulacks/git-jira-issue-selector",
-    download_url="https://github.com/Berulacks/git-jira-issue-selector/releases/download/v1.0.9/JiraIssueSelector-1.0.9-py3-none-any.whl",
+    download_url="https://github.com/Berulacks/git-jira-issue-selector/releases/download/v1.0.9.1/JiraIssueSelector-1.0.9.1-py3-none-any.whl",
 
     #
     # license="LICENSE.txt",
@@ -44,7 +44,7 @@ setup(
 
     # Dependent packages (distributions)
     install_requires=[
-        'blessed==1.14.2',
+        'blessed==1.15',
         'certifi==2018.4.16',
         'chardet==3.0.4',
         'fuzzywuzzy==0.16.0',
