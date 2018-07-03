@@ -52,7 +52,7 @@ setup(
         'GitPython==2.1.9',
         'idna==2.6',
         'python-Levenshtein==0.12.0',
-        'PyYAML==3.12',
+        'PyYAML==4.2b4',
         'requests==2.18.4',
         'six==1.11.0',
         'smmap2==2.0.3',
