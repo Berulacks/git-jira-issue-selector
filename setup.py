@@ -44,15 +44,15 @@ setup(
 
     # Dependent packages (distributions)
     install_requires=[
-        'blessed==1.15',
+        'blessed>=1.15',
         'certifi==2018.4.16',
         'chardet==3.0.4',
-        'fuzzywuzzy==0.16.0',
+        'fuzzywuzzy>=0.16.0',
         'gitdb2==2.0.3',
         'GitPython==2.1.9',
         'idna==2.6',
         'python-Levenshtein==0.12.0',
-        'PyYAML==4.2b4',
+        'PyYAML>=4.2b4',
         'requests==2.18.4',
         'six==1.11.0',
         'smmap2==2.0.3',
