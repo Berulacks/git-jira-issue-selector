@@ -337,12 +337,12 @@ class IssueSelector:
     def current_local_config_ts(self):
         local_config_path = self.local_config_path
 
-        return os.path.getmtime(local_config_path)
+        return round( os.path.getmtime(local_config_path) )
 
     def current_global_config_ts(self):
         global_config_path = self.global_config_path
 
-        return os.path.getmtime(global_config_path)
+        return round( os.path.getmtime(global_config_path) )
 
 
     def local_configuration_path(self,git_root=None,git_branch=None):
