@@ -22,6 +22,8 @@ generate them and prompt you to edit them. This only happens on first-run. **The
 
 The program stores all configuration and cache files in `$HOME/.config/jira_issue_selector`. Cache files are updated every time the user invokes the script with the `-u` flag, updates a configuration file, or the time specified in the `Refresh Interval` field from a configuration file has passed since the program was last run.
 
+When creating new branches in a project you might not want to fill in the local config every time; in this case use the `git jira config copy` command to enter an interactive selection UI to copy/use an older config from another branch (or even project)
+
 _NB:_ Configuration files are loaded in the following order: `Global -> Local -> Additional config specified by the user`
 
 ## Usage: 
