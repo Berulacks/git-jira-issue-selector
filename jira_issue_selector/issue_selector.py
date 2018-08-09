@@ -271,7 +271,10 @@ class IssueSelector:
             title = "# -- Global Configuration File --\n"
             pre = "First time setup complete, configuration required. Press any key to continue."
             post = "Config generated. Please try again. Remember, you can always call `git jira-config global` to edit the global config" if not self.edit_mode else ""
-            self.interactive_config_bootstrap(global_config_path,"",title,pre,post)
+            source = self.script_dir()+"/data/{}.example".format(self.GLOBAL_CONFIG_FILE_NAME)
+            # This quits the program execution, so we don't need to worry about global_conf being none - this is the end of the program!
+            self.interactive_config_bootstrap(global_config_path,title,source,pre,post)
+
         final_conf = global_conf
 
         # Load Local config
