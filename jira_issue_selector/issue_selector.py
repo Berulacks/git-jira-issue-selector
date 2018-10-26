@@ -173,10 +173,10 @@ class IssueSelector:
         current_global_ts = self.current_global_config_ts()
 
         # In case we don't have the requisite folder structure for our cache
-        if not os.path.exists( Path( path ).parent ):
-            os.makedirs( Path(path).parent )
+        if not os.path.exists( str( Path( path ).parent ) ):
+            os.makedirs( str( Path(path).parent ) )
 
-        with open(path,"w+") as cache_file :
+        with open(str(path),"w+") as cache_file :
             # CACHE TIMESTAMP
             cache_file.write( "{}\n".format( time.time() ) )
             # LOCAL TIMESTAMP
@@ -190,8 +190,8 @@ class IssueSelector:
 
         issues = []
 
-        if os.path.exists(path):
-            with open(path,'r') as cache_file :
+        if os.path.exists(str(path)):
+            with open(str(path),'r') as cache_file :
                 issues = cache_file.readlines()
 
                 #The first line is always the timestamp
@@ -213,17 +213,17 @@ class IssueSelector:
 
     def load_config(self,path):
 
-        if os.path.exists(path):
-            with open(path, 'r') as config_file:
+        if os.path.exists(str(path)):
+            with open(str(path), 'r') as config_file:
                 global_config = yaml.load( config_file )
 
             return global_config
         return None
 
     def add_title_to_file(self,path, line_to_write, drop_original_title=True):
-        with open(path, "r") as sources:
+        with open(str(path), "r") as sources:
             lines = sources.readlines()
-        with open(path, "w") as sources:
+        with open(str(path), "w") as sources:
             sources.write(line_to_write)
             if drop_original_title:
                 sources.writelines(lines[1:])
@@ -321,7 +321,7 @@ class IssueSelector:
 
         # Make the parent directory (if necessary)
         if not os.path.exists( str(path.parent) ):
-            os.makedirs(path.parent)
+            os.makedirs(str( path.parent ))
 
         # Now the file itself
         if not os.path.exists( str(path) ):
