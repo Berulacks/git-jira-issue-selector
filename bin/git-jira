@@ -11,7 +11,7 @@ function check_py_version
 
 MESSAGE_EXIT_CODE=60
 PYTHON_BINARY=""
-POTENTIAL_BINARIES=( "python" "python3" "python3.6" "python3.5" )
+POTENTIAL_BINARIES=( "python" "python3" "python3.6" "python3.5" "python3.7" "python3.4" "python3.3" "python3.8" "python3.2" "python3.1" )
 PY3_SUPPORT=false
 
 for i in "${POTENTIAL_BINARIES[@]}"
@@ -88,17 +88,18 @@ then
 
 		# Might put more stuff here, later. Haven't decided.
 		"help")
-			$PYTHON_BINARY -m jira_issue_selector -h
 			echo
-			echo "You may also use the 'git jira' wrapper script."
-			echo "It simply wraps the python script, and adds some functionality:"
-			echo
-			echo "usage: git jira [config global|local|copy] [help] [commit]"
+			echo "git-jira is just a wrapper for the python jira_issue_selector class. However, it also adds some functionality:"
+			echo "usage: git jira [config global|local|copy] [help] [commit] [args]"
 			echo
 			echo "optional arguments: "
-			echo "  [commit] Run the issue-selector, then pass the selected issue to 'git commit'"
+			echo "  [commit] Run the issue-selector, then pass the selected issue to 'git commit' (This is probably what you want to use)"
 			echo "  [config] same as the -e flag above. Note: Pass 'copy' to initiate the interactive config copying dialogue"
 			echo "  [help] same as the -h flag above"
+			echo "  [args] Arguments to pass directly to the python program, see section below"
+			echo
+			echo "=== Original Python Program Below ==="
+			$PYTHON_BINARY -m jira_issue_selector -h
 			exit
 			;;
 
