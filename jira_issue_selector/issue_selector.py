@@ -549,6 +549,6 @@ class IssueSelector:
 
                 print("Replacing {0} with {1}...".format(current_local_config_path, selected_path))
                 if not self.dry_run:
-                    shutil.copyfile(selected_path,current_local_config_path)
+                    shutil.copyfile(str(selected_path),str(current_local_config_path))
 
         exit( self.normal_exit_code )
