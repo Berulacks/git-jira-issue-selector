@@ -5,7 +5,7 @@
 
 Just run: `pip3 install JiraIssueSelector` (or download and use one of the releases from [the GitHub repo](https://github.com/Berulacks/git-jira-issue-selector))
 
-*NB: This program requires Python 3.0 or later.*
+*NB: This program requires Python 3.0 or later, compiled with Curses support.*
 
 ## Configuration:
 
@@ -79,3 +79,12 @@ optional arguments:
                         output of the program. I recommend using mktemp to
                         generate this file path. (default: )
 ```
+
+#### Troubleshooting
+
+##### I'm getting an `ImportError: No module named '_curses'` error
+_Note: This will most likely happen if you're using your own compiled version of Python._
+
+Your version of python wasn't compiled with curses support. This is odd, as most distros tend to ship with it. A solution is to install the curses library and its development headers (`libncurses5-dev` and maybe `libncursesw5-dev` on Ubuntu), then coompile a new version of python.
+
+...or you could try to find a packaged version of Python compiled with curses. Up to you. I'd recommend the former on machines that don't support it.
