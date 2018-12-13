@@ -53,7 +53,7 @@ setup(
         'idna==2.6',
         'python-Levenshtein==0.12.0',
         'PyYAML>=4.2b4',
-        'requests==2.18.4',
+        'requests>=2.21.0',
         'six==1.11.0',
         'smmap2==2.0.3',
         'urllib3==1.23',
