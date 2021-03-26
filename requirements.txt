@@ -6,7 +6,7 @@ gitdb2==2.0.3
 GitPython==2.1.9
 idna==2.6
 python-Levenshtein==0.12.0
-PyYAML==3.12
+PyYAML==5.4
 requests>=2.21.0
 six==1.11.0
 smmap2==2.0.3
