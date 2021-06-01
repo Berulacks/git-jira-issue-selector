@@ -56,7 +56,7 @@ setup(
         'requests>=2.21.0',
         'six==1.11.0',
         'smmap2==2.0.3',
-        'urllib3==1.24.2',
+        'urllib3==1.26.5',
         'wcwidth==0.1.7'
     ],
     python_requires='>=3',
