@@ -215,7 +215,7 @@ class IssueSelector:
 
         if os.path.exists(str(path)):
             with open(str(path), 'r') as config_file:
-                global_config = yaml.load( config_file )
+                global_config = yaml.load( config_file , Loader = yaml.SafeLoader )
 
             return global_config
         return None
