@@ -45,16 +45,16 @@ setup(
     # Dependent packages (distributions)
     install_requires=[
         'blessed>=1.15',
-        'certifi==2018.4.16',
+        'certifi>=2019.9.11',
         'chardet==3.0.4',
         'fuzzywuzzy>=0.16.0',
         'gitdb2==2.0.3',
         'GitPython==2.1.9',
-        'idna==2.6',
+        'idna>=2.8',
         'python-Levenshtein==0.12.0',
         'PyYAML>=4.2b4',
         'requests>=2.21.0',
-        'six==1.11.0',
+        'six>=1.13.0',
         'smmap2==2.0.3',
         'urllib3==1.26.5',
         'wcwidth==0.1.7'
