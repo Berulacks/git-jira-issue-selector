@@ -1,5 +1,5 @@
 blessed==1.14.2
-certifi==2022.12.7
+certifi==2023.7.22
 chardet==3.0.4
 fuzzywuzzy==0.16.0
 gitdb2==2.0.3
