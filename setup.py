@@ -49,7 +49,7 @@ setup(
         'chardet==3.0.4',
         'fuzzywuzzy>=0.16.0',
         'gitdb2==2.0.3',
-        'GitPython==3.1.32',
+        'GitPython==3.1.37',
         'idna>=2.8',
         'python-Levenshtein==0.12.0',
         'PyYAML>=4.2b4',
